@@ -1,0 +1,223 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum ModuleStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentType {
+  TEXT
+  DOCUMENT
+  VIDEO
+  IMAGE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  avatar    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher   Teacher?
+  student   Student?
+
+  @@map("users")
+}
+
+model Teacher {
+  id                  String               @id @default(uuid())
+  userId              String               @unique
+  teacherNumber       String               @unique // NIP / Nomor Induk Guru
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  homeroomClasses     Class[]              @relation("HomeroomClasses")
+  teachingAssignments TeachingAssignment[]
+  modules             Module[]
+
+  @@map("teachers")
+}
+
+model Student {
+  id            String         @id @default(uuid())
+  userId        String         @unique
+  studentNumber String         @unique // NIS
+  nisn          String         @unique // NISN
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes       ClassStudent[]
+  moduleProgress ModuleProgress[]
+
+  @@map("students")
+}
+
+model AcademicYear {
+  id                  String               @id @default(uuid())
+  name                String
+  startDate           DateTime
+  endDate             DateTime
+  isActive            Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  classes             Class[]
+  teachingAssignments TeachingAssignment[]
+  modules             Module[]
+
+  @@map("academic_years")
+}
+
+model Subject {
+  id                  String               @id @default(uuid())
+  name                String
+  code                String               @unique
+  description         String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  teachingAssignments TeachingAssignment[]
+  modules             Module[]
+
+  @@map("subjects")
+}
+
+model Class {
+  id                  String               @id @default(uuid())
+  name                String
+  grade               String
+  academicYearId      String
+  homeroomTeacherId   String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  academicYear        AcademicYear         @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  homeroomTeacher     Teacher?             @relation("HomeroomClasses", fields: [homeroomTeacherId], references: [id], onDelete: SetNull)
+  students            ClassStudent[]
+  teachingAssignments TeachingAssignment[]
+  modules             Module[]
+
+  @@map("classes")
+}
+
+model ClassStudent {
+  id        String   @id @default(uuid())
+  classId   String
+  studentId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@map("class_students")
+}
+
+model TeachingAssignment {
+  id             String       @id @default(uuid())
+  teacherId      String
+  classId        String
+  subjectId      String
+  academicYearId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  teacher        Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  class          Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  modules        Module[]
+
+  @@unique([teacherId, classId, subjectId, academicYearId])
+  @@map("teaching_assignments")
+}
+
+model Module {
+  id                   String             @id @default(uuid())
+  title                String
+  description          String?
+  learningObjectives   String
+  thumbnailUrl         String?
+  status               ModuleStatus       @default(DRAFT)
+  teacherId            String
+  teachingAssignmentId String
+  classId              String
+  subjectId            String
+  academicYearId       String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  publishedAt          DateTime?
+
+  teacher              Teacher            @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teachingAssignment   TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id], onDelete: Cascade)
+  class                Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject              Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  academicYear         AcademicYear       @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  contents             ModuleContent[]
+  progress             ModuleProgress[]
+
+  @@map("modules")
+}
+
+model ModuleContent {
+  id          String         @id @default(uuid())
+  moduleId    String
+  title       String
+  description String?
+  contentType ContentType
+  textContent String?
+  fileUrl     String?
+  videoUrl    String?
+  imageUrl    String?
+  orderNumber Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  module      Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress    ModuleProgress[]
+
+  @@map("module_contents")
+}
+
+model ModuleProgress {
+  id              String         @id @default(uuid())
+  studentId       String
+  moduleId        String
+  moduleContentId String
+  isCompleted     Boolean        @default(true)
+  completedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  student         Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  module          Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleContent   ModuleContent  @relation(fields: [moduleContentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, moduleContentId])
+  @@map("module_progress")
+}

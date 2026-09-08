@@ -1,0 +1,7 @@
+{
+  "name": "Sekolah Model",
+  "description": "Aplikasi Mobile LMS (Learning Management System) Sekolah Model untuk Android dan iOS berbasis React Native Expo dan Node.js Express Prisma.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
