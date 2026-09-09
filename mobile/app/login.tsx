@@ -187,9 +187,12 @@ export default function LoginScreen() {
           {/* Header BISA */}
           <View style={styles.header}>
             <Logo size="md" variant="dark" />
-            <Text style={styles.welcomeTitle}>Selamat Datang 👋</Text>
+            <View style={styles.mottoPill}>
+              <Text style={styles.mottoPillText}>Hebat • Mandiri • Kreatif</Text>
+            </View>
+            <Text style={styles.welcomeTitle}>👋 Selamat Datang 👋</Text>
             <Text style={styles.welcomeSubtitle}>
-              Masuk untuk melanjutkan perjalanan belajarmu.
+              Masuk untuk melanjutkan perjalanan belajarmu di BISA - Bisa Insani Smart Academy.
             </Text>
           </View>
 
@@ -201,12 +204,7 @@ export default function LoginScreen() {
             />
           )}
 
-          {/* Section: Pilih Role Login (3 Interactive Cards) */}
-          <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>PILIH PERAN MASUK</Text>
-            <Text style={styles.sectionMotto}>BISA • PKBM Bina Insani</Text>
-          </View>
-
+          {/* Section: 3 Role Cards in 3-Column Layout */}
           <View style={styles.roleGrid}>
             {ROLES.map((role) => {
               const isSelected = selectedRole === role.id;
@@ -227,49 +225,75 @@ export default function LoginScreen() {
                     onPress={() => handleRoleSelect(role.id)}
                     style={[
                       styles.roleCard,
-                      isSelected && {
-                        borderColor: role.color,
-                        borderWidth: 2,
-                        backgroundColor: '#FFFFFF',
-                        ...Shadows.medium,
+                      {
+                        backgroundColor: role.bgLight,
+                        borderColor: isSelected ? role.color : '#E2E8F0',
+                        borderWidth: isSelected ? 2 : 1,
                       },
+                      isSelected && Shadows.medium,
                     ]}
                   >
                     <View
                       style={[
                         styles.roleIconCircle,
                         {
-                          backgroundColor: isSelected ? role.bgLight : '#F1F5F9',
+                          backgroundColor: '#FFFFFF',
                         },
                       ]}
                     >
                       <Ionicons
                         name={role.icon}
                         size={22}
-                        color={isSelected ? role.color : '#64748B'}
+                        color={role.color}
                       />
                     </View>
-                    <View style={styles.roleContent}>
-                      <View style={styles.roleHeaderRow}>
-                        <Text
-                          style={[
-                            styles.roleName,
-                            isSelected && { color: role.color, fontWeight: '800' },
-                          ]}
-                        >
-                          {role.title}
-                        </Text>
-                        {isSelected && (
-                          <View style={[styles.activeDot, { backgroundColor: role.color }]} />
-                        )}
-                      </View>
-                      <Text style={styles.roleDescription}>{role.description}</Text>
+                    <Text
+                      style={[
+                        styles.roleName,
+                        isSelected && { color: role.color, fontWeight: '800' },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {role.title}
+                    </Text>
+                    <Text style={styles.roleDescription} numberOfLines={2}>
+                      {role.description}
+                    </Text>
+                    <View
+                      style={[
+                        styles.roleArrowCircle,
+                        { backgroundColor: role.color },
+                      ]}
+                    >
+                      <Ionicons name="arrow-forward" size={12} color="#FFFFFF" />
                     </View>
                   </TouchableOpacity>
                 </Animated.View>
               );
             })}
           </View>
+
+          {/* Direct Google Access for Students */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Atau masuk langsung sebagai Siswa</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => setShowGoogleModal(true)}
+            style={styles.googleHeroCard}
+          >
+            <View style={styles.googleHeroIconWrap}>
+              <Ionicons name="logo-google" size={20} color="#EA4335" />
+            </View>
+            <Text style={styles.googleHeroText}>Lanjutkan dengan Google</Text>
+            <Ionicons name="chevron-forward" size={18} color="#0284C7" />
+          </TouchableOpacity>
+          <Text style={styles.googleHeroSubtext}>
+            Gunakan akun <Text style={{ fontWeight: '700', color: '#334155' }}>Google / Gmail</Text> yang kamu miliki
+          </Text>
 
           {/* DYNAMIC FORM ACCORDING TO SELECTED ROLE */}
           <View style={styles.formContainer}>
@@ -531,73 +555,120 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingHorizontal: 20,
   },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-    marginTop: 6,
-    paddingHorizontal: 2,
+  mottoPill: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FCD34D',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    marginTop: 8,
+    marginBottom: 4,
   },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#475569',
-    letterSpacing: 0.8,
-  },
-  sectionMotto: {
+  mottoPillText: {
+    color: '#92400E',
     fontSize: 10,
-    fontWeight: '700',
-    color: '#0284C7',
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   roleGrid: {
-    gap: 10,
+    flexDirection: 'row',
+    gap: 8,
     marginBottom: 16,
   },
   roleCardWrapper: {
-    width: '100%',
+    flex: 1,
   },
   roleCard: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     borderRadius: 16,
-    padding: 12,
+    padding: 10,
+    minHeight: 145,
+    justifyContent: 'space-between',
     ...Shadows.soft,
   },
   roleIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginBottom: 6,
+    ...Shadows.soft,
   },
-  roleContent: {
+  roleName: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1E293B',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  roleDescription: {
+    fontSize: 9,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 12,
     flex: 1,
   },
-  roleHeaderRow: {
+  roleArrowCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginTop: 6,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 14,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  dividerText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
+    paddingHorizontal: 8,
+  },
+  googleHeroCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 2,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#BFDBFE',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    ...Shadows.soft,
   },
-  roleName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1E293B',
+  googleHeroIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  googleHeroText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1D4ED8',
+    flex: 1,
+    marginLeft: 12,
   },
-  roleDescription: {
-    fontSize: 11,
-    color: '#64748B',
-    lineHeight: 16,
+  googleHeroSubtext: {
+    fontSize: 10,
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 16,
   },
   formContainer: {
     backgroundColor: '#FFFFFF',
