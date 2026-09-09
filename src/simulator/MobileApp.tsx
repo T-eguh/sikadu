@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Role } from './types';
-import { mockBackend, TOKEN_STORAGE_KEY, SEED_USERS } from './mockApi';
+import { mockBackend, TOKEN_STORAGE_KEY } from './mockApi';
 import { SplashScreen } from './screens/SplashScreen';
-import { LoginScreen } from './screens/LoginScreen';
+import { WelcomeScreen } from './screens/WelcomeScreen';
+import { RoleSelectionScreen } from './screens/RoleSelectionScreen';
+import { StudentLoginScreen } from './screens/StudentLoginScreen';
+import { StudentActivationScreen } from './screens/StudentActivationScreen';
+import { StudentSuccessScreen } from './screens/StudentSuccessScreen';
 import { AdminScreens } from './screens/AdminScreens';
 import { TeacherScreens } from './screens/TeacherScreens';
 import { StudentScreens } from './screens/StudentScreens';
@@ -17,20 +21,33 @@ import {
   BookOpen,
   CheckSquare,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
+import { PkbmOfficialLogo } from './components/LoginVisualAssets';
+
+export type ScreenState =
+  | 'splash'
+  | 'welcome'
+  | 'role_select'
+  | 'student_login'
+  | 'student_activation'
+  | 'student_success'
+  | 'app';
 
 export const MobileApp: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<'splash' | 'login' | 'app'>('splash');
+  const [currentScreen, setCurrentScreen] = useState<ScreenState>('splash');
   const [user, setUser] = useState<User | null>(null);
+  const [joinedClassData, setJoinedClassData] = useState<any>(null);
+
+  // Tabs for each role
   const [adminTab, setAdminTab] = useState<'dashboard' | 'guru' | 'siswa' | 'profile'>('dashboard');
   const [teacherTab, setTeacherTab] = useState<'dashboard' | 'kelas' | 'modul' | 'profile'>('dashboard');
   const [studentTab, setStudentTab] = useState<'dashboard' | 'modul' | 'tugas' | 'profile'>('dashboard');
 
+  // Check initial session
   const checkInitialSession = useCallback(async () => {
     const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!token) {
-      return;
-    }
+    if (!token) return;
     try {
       const u = await mockBackend.getMe(token);
       setUser(u);
@@ -44,56 +61,163 @@ export const MobileApp: React.FC = () => {
     checkInitialSession();
   }, [checkInitialSession]);
 
+  // Halaman 1 -> Halaman 2 (or straight to app if user session exists)
   const handleSplashFinish = () => {
     if (user) {
       setCurrentScreen('app');
     } else {
-      setCurrentScreen('login');
+      setCurrentScreen('welcome');
     }
   };
 
-  const handleLoginSuccess = (loggedInUser: User) => {
+  // Halaman 2 -> Halaman 3 (Welcome -> Role Selection)
+  const handleStartWelcome = () => {
+    setCurrentScreen('role_select');
+  };
+
+  // Halaman 3 Role Selection
+  const handleSelectRole = (role: 'SISWA' | 'ADMIN' | 'GURU') => {
+    if (role === 'SISWA') {
+      setCurrentScreen('student_login');
+    }
+  };
+
+  // Staff (Admin/Guru) login success from RoleSelectionScreen
+  const handleStaffLoginSuccess = (loggedInUser: User, token: string) => {
     setUser(loggedInUser);
     setAdminTab('dashboard');
     setTeacherTab('dashboard');
+    setCurrentScreen('app');
+  };
+
+  // Halaman 4: Student Google Login Success
+  const handleStudentLoginSuccess = (
+    loggedInUser: User,
+    token: string,
+    requiresClassCode?: boolean
+  ) => {
+    setUser(loggedInUser);
     setStudentTab('dashboard');
+
+    if (requiresClassCode || loggedInUser.student?.status === 'PENDING') {
+      // Direct transition to Halaman 6: Lengkapi Pendaftaran!
+      setCurrentScreen('student_activation');
+    } else {
+      // Directly to Halaman 8: Dashboard Siswa
+      setCurrentScreen('app');
+    }
+  };
+
+  // Halaman 6: Class Code Submitted Successfully -> Halaman 7: Success Screen
+  const handleClassJoinSuccess = (updatedUser: User, classData: any) => {
+    setUser(updatedUser);
+    setJoinedClassData(classData);
+    setCurrentScreen('student_success');
+  };
+
+  // Halaman 7 -> Halaman 8: Mulai Belajar -> Dashboard Siswa
+  const handleContinueToDashboard = () => {
     setCurrentScreen('app');
   };
 
   const handleLogout = () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setUser(null);
-    setCurrentScreen('login');
+    setJoinedClassData(null);
+    setCurrentScreen('role_select');
   };
 
+  // ==================== SCREEN ROUTER ====================
+  // 1. SPLASH SCREEN
   if (currentScreen === 'splash') {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
-  if (currentScreen === 'login' || !user) {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  // 2. WELCOME SCREEN
+  if (currentScreen === 'welcome') {
+    return <WelcomeScreen onStart={handleStartWelcome} />;
   }
 
-  // Get Role Color Theme & Labels
+  // 3. ROLE SELECTION SCREEN
+  if (currentScreen === 'role_select') {
+    return (
+      <RoleSelectionScreen
+        onSelectRole={handleSelectRole}
+        onStaffLoginSuccess={handleStaffLoginSuccess}
+        onBackToWelcome={() => setCurrentScreen('welcome')}
+      />
+    );
+  }
+
+  // 4. STUDENT LOGIN SCREEN
+  if (currentScreen === 'student_login') {
+    return (
+      <StudentLoginScreen
+        onBackToRoles={() => setCurrentScreen('role_select')}
+        onStudentLoginSuccess={handleStudentLoginSuccess}
+      />
+    );
+  }
+
+  // 6. STUDENT ACTIVATION / LENGKAPI PENDAFTARAN SCREEN
+  if (currentScreen === 'student_activation' && user) {
+    return (
+      <StudentActivationScreen
+        currentUser={user}
+        onJoinSuccess={handleClassJoinSuccess}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // 7. STUDENT SUCCESS SCREEN
+  if (currentScreen === 'student_success' && user) {
+    return (
+      <StudentSuccessScreen
+        currentUser={user}
+        classData={joinedClassData}
+        onContinueToDashboard={handleContinueToDashboard}
+      />
+    );
+  }
+
+  // Fallback if no user is authenticated
+  if (!user) {
+    return (
+      <RoleSelectionScreen
+        onSelectRole={handleSelectRole}
+        onStaffLoginSuccess={handleStaffLoginSuccess}
+        onBackToWelcome={() => setCurrentScreen('welcome')}
+      />
+    );
+  }
+
+  // 8. MAIN APP SCREEN (Dashboard & tabs for Student, Teacher, or Admin)
   const getRoleHeader = () => {
     switch (user.role) {
       case 'ADMIN':
         return {
           title: 'Administrator',
-          badgeBg: 'bg-purple-100',
-          badgeText: 'text-purple-700',
+          badgeBg: 'bg-rose-50 border border-rose-200',
+          badgeText: 'text-[#E53935]',
+          avatarBg: 'bg-[#E53935]',
+          themeColor: '#E53935',
         };
       case 'TEACHER':
         return {
           title: 'Guru Pengajar',
-          badgeBg: 'bg-sky-100',
-          badgeText: 'text-sky-700',
+          badgeBg: 'bg-emerald-50 border border-emerald-200',
+          badgeText: 'text-[#0F5C40]',
+          avatarBg: 'bg-[#0F5C40]',
+          themeColor: '#0F5C40',
         };
       case 'STUDENT':
         return {
           title: 'Siswa',
-          badgeBg: 'bg-emerald-100',
-          badgeText: 'text-emerald-700',
+          badgeBg: 'bg-emerald-50 border border-emerald-200',
+          badgeText: 'text-[#1B7F5A]',
+          avatarBg: 'bg-[#1B7F5A]',
+          themeColor: '#1B7F5A',
         };
     }
   };
@@ -101,33 +225,36 @@ export const MobileApp: React.FC = () => {
   const roleInfo = getRoleHeader();
 
   return (
-    <div className="flex-1 w-full flex flex-col bg-slate-50 overflow-hidden">
+    <div className="flex-1 w-full flex flex-col bg-[#F7F9F8] overflow-hidden select-none font-sans">
       {/* Mobile Screen Header */}
-      <div className="bg-white px-4 py-2.5 border-b border-slate-200 flex items-center justify-between shrink-0 shadow-sm z-10">
+      <div className="bg-white px-4 py-2.5 border-b border-slate-200/90 flex items-center justify-between shrink-0 shadow-2xs z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#1E3A8A] flex items-center justify-center text-white text-xs font-bold shadow-sm">
-            {user.name.charAt(0)}
+          <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-0.5 shadow-2xs">
+            <PkbmOfficialLogo size={24} showText={false} variant="color" />
           </div>
           <div>
-            <h2 className="text-xs font-bold text-slate-900 leading-tight">
-              Halo, {user.name.split(' ')[0]}
-            </h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black text-[#1F2937] leading-none">
+                BISA
+              </span>
               <span
-                className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md ${roleInfo.badgeBg} ${roleInfo.badgeText}`}
+                className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${roleInfo.badgeBg} ${roleInfo.badgeText}`}
               >
                 {roleInfo.title}
               </span>
             </div>
+            <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">
+              PKBM Bina Insani
+            </p>
           </div>
         </div>
 
         <button
           onClick={handleLogout}
-          title="Logout"
-          className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition active:scale-95"
+          title="Keluar"
+          className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#E53935] flex items-center justify-center transition active:scale-95 border border-rose-100"
         >
-          <LogOut size={16} />
+          <LogOut size={15} />
         </button>
       </div>
 
@@ -161,130 +288,154 @@ export const MobileApp: React.FC = () => {
         )}
       </div>
 
-      {/* Role-Based Bottom Navigation Bar */}
-      <div className="bg-white border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shrink-0 shadow-sm z-10">
-        {/* Admin Navigation */}
+      {/* MODERN BOTTOM NAVIGATION BAR (Docked, Soft Shadow, Active Pill Highlight) */}
+      <div className="bg-white border-t border-slate-200/90 py-1.5 px-3 flex items-center justify-around shrink-0 shadow-lg z-10">
+        {/* Administrator Navigation (Merah Elegan) */}
         {user.role === 'ADMIN' && (
           <>
             <button
               onClick={() => setAdminTab('dashboard')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                adminTab === 'dashboard' ? 'text-[#1E3A8A] font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                adminTab === 'dashboard'
+                  ? 'text-[#E53935] font-bold bg-rose-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <LayoutGrid size={18} />
-              <span className="text-[10px] mt-1">Dashboard</span>
+              <span className="text-[10px] mt-0.5">Dashboard</span>
             </button>
             <button
               onClick={() => setAdminTab('guru')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                adminTab === 'guru' ? 'text-[#1E3A8A] font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                adminTab === 'guru'
+                  ? 'text-[#E53935] font-bold bg-rose-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <Users size={18} />
-              <span className="text-[10px] mt-1">Guru</span>
+              <span className="text-[10px] mt-0.5">Guru</span>
             </button>
             <button
               onClick={() => setAdminTab('siswa')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                adminTab === 'siswa' ? 'text-[#1E3A8A] font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                adminTab === 'siswa'
+                  ? 'text-[#E53935] font-bold bg-rose-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <GraduationCap size={18} />
-              <span className="text-[10px] mt-1">Siswa</span>
+              <span className="text-[10px] mt-0.5">Siswa</span>
             </button>
             <button
               onClick={() => setAdminTab('profile')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                adminTab === 'profile' ? 'text-[#1E3A8A] font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                adminTab === 'profile'
+                  ? 'text-[#E53935] font-bold bg-rose-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <UserIcon size={18} />
-              <span className="text-[10px] mt-1">Profil</span>
+              <span className="text-[10px] mt-0.5">Profil</span>
             </button>
           </>
         )}
 
-        {/* Teacher Navigation */}
+        {/* Teacher Navigation (Hijau Profesional) */}
         {user.role === 'TEACHER' && (
           <>
             <button
               onClick={() => setTeacherTab('dashboard')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                teacherTab === 'dashboard' ? 'text-sky-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                teacherTab === 'dashboard'
+                  ? 'text-[#0F5C40] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <LayoutGrid size={18} />
-              <span className="text-[10px] mt-1">Dashboard</span>
+              <span className="text-[10px] mt-0.5">Dashboard</span>
             </button>
             <button
               onClick={() => setTeacherTab('kelas')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                teacherTab === 'kelas' ? 'text-sky-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                teacherTab === 'kelas'
+                  ? 'text-[#0F5C40] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <BookMarked size={18} />
-              <span className="text-[10px] mt-1">Kelas</span>
+              <span className="text-[10px] mt-0.5">Kelas</span>
             </button>
             <button
               onClick={() => setTeacherTab('modul')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                teacherTab === 'modul' ? 'text-sky-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                teacherTab === 'modul'
+                  ? 'text-[#0F5C40] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <FileText size={18} />
-              <span className="text-[10px] mt-1">Modul</span>
+              <span className="text-[10px] mt-0.5">Modul</span>
             </button>
             <button
               onClick={() => setTeacherTab('profile')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                teacherTab === 'profile' ? 'text-sky-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                teacherTab === 'profile'
+                  ? 'text-[#0F5C40] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <UserIcon size={18} />
-              <span className="text-[10px] mt-1">Profil</span>
+              <span className="text-[10px] mt-0.5">Profil</span>
             </button>
           </>
         )}
 
-        {/* Student Navigation */}
+        {/* Student Navigation as specified: Beranda, Belajar, Progress, Profil */}
         {user.role === 'STUDENT' && (
           <>
             <button
               onClick={() => setStudentTab('dashboard')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                studentTab === 'dashboard' ? 'text-emerald-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                studentTab === 'dashboard'
+                  ? 'text-[#1B7F5A] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <Home size={18} />
-              <span className="text-[10px] mt-1">Beranda</span>
+              <span className="text-[10px] mt-0.5">Beranda</span>
             </button>
             <button
               onClick={() => setStudentTab('modul')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                studentTab === 'modul' ? 'text-emerald-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                studentTab === 'modul'
+                  ? 'text-[#1B7F5A] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <BookOpen size={18} />
-              <span className="text-[10px] mt-1">Modul</span>
+              <span className="text-[10px] mt-0.5">Belajar</span>
             </button>
             <button
               onClick={() => setStudentTab('tugas')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                studentTab === 'tugas' ? 'text-emerald-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                studentTab === 'tugas'
+                  ? 'text-[#1B7F5A] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <CheckSquare size={18} />
-              <span className="text-[10px] mt-1">Tugas</span>
+              <span className="text-[10px] mt-0.5">Progress</span>
             </button>
             <button
               onClick={() => setStudentTab('profile')}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${
-                studentTab === 'profile' ? 'text-emerald-600 font-bold' : 'text-slate-400'
+              className={`flex flex-col items-center py-1 px-3 rounded-xl transition duration-150 ${
+                studentTab === 'profile'
+                  ? 'text-[#1B7F5A] font-bold bg-emerald-50'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               <UserIcon size={18} />
-              <span className="text-[10px] mt-1">Profil</span>
+              <span className="text-[10px] mt-0.5">Profil</span>
             </button>
           </>
         )}

@@ -132,75 +132,75 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        {/* 3. THREE ROLE CARDS IN 3-COLUMN GRID */}
+        {/* 3. THREE ROLE CARDS IN 3-COLUMN GRID (Green and Red Theme) */}
         <div className="grid grid-cols-3 gap-2 mt-3.5">
-          {/* Card 1: Administrator */}
+          {/* Card 1: Administrator (Ruby Red Theme) */}
           <button
             type="button"
             onClick={openAdminModal}
-            className="group text-left bg-[#F0F7FF] hover:bg-[#E0F2FE] border border-[#BFDBFE] hover:border-blue-400 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
+            className="group text-left bg-[#FEF2F2] hover:bg-[#FEE2E2] border border-[#FECDD3] hover:border-red-400 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
           >
             <div>
               {/* 3D Avatar */}
               <div className="flex justify-center mb-1">
                 <AdminAvatar3D size={48} />
               </div>
-              <h3 className="text-xs font-bold text-slate-900 group-hover:text-blue-900 transition leading-tight">
+              <h3 className="text-xs font-bold text-slate-900 group-hover:text-red-800 transition leading-tight">
                 Administrator
               </h3>
-              <p className="text-[9.5px] text-slate-500 mt-1 leading-tight line-clamp-2">
+              <p className="text-[9.5px] text-slate-600 mt-1 leading-tight line-clamp-2">
                 Kelola sistem dan aktivitas pembelajaran.
               </p>
             </div>
-            {/* Round Action Button */}
-            <div className="w-5 h-5 rounded-full bg-[#2563EB] group-hover:bg-[#1D4ED8] text-white flex items-center justify-center self-end mt-2 shadow-sm transition">
+            {/* Round Action Button in Ruby Red */}
+            <div className="w-5 h-5 rounded-full bg-[#DC2626] group-hover:bg-[#B91C1C] text-white flex items-center justify-center self-end mt-2 shadow-sm transition">
               <ArrowRight size={11} strokeWidth={2.5} />
             </div>
           </button>
 
-          {/* Card 2: Guru */}
+          {/* Card 2: Guru (Crimson/Rose Theme) */}
           <button
             type="button"
             onClick={() => openGuruModal()}
-            className="group text-left bg-[#FAF5FF] hover:bg-[#F3E8FF] border border-[#E9D5FF] hover:border-purple-400 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
+            className="group text-left bg-[#FFF1F2] hover:bg-[#FFE4E6] border border-[#FECDD3] hover:border-rose-400 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
           >
             <div>
               {/* 3D Avatar */}
               <div className="flex justify-center mb-1">
                 <TeacherAvatar3D size={48} />
               </div>
-              <h3 className="text-xs font-bold text-slate-900 group-hover:text-purple-900 transition leading-tight">
+              <h3 className="text-xs font-bold text-slate-900 group-hover:text-rose-800 transition leading-tight">
                 Guru
               </h3>
-              <p className="text-[9.5px] text-slate-500 mt-1 leading-tight line-clamp-2">
+              <p className="text-[9.5px] text-slate-600 mt-1 leading-tight line-clamp-2">
                 Kelola kelas dan materi pembelajaran.
               </p>
             </div>
-            {/* Round Action Button */}
-            <div className="w-5 h-5 rounded-full bg-[#9333EA] group-hover:bg-[#7E22CE] text-white flex items-center justify-center self-end mt-2 shadow-sm transition">
+            {/* Round Action Button in Crimson */}
+            <div className="w-5 h-5 rounded-full bg-[#E11D48] group-hover:bg-[#BE123C] text-white flex items-center justify-center self-end mt-2 shadow-sm transition">
               <ArrowRight size={11} strokeWidth={2.5} />
             </div>
           </button>
 
-          {/* Card 3: Siswa */}
+          {/* Card 3: Siswa (Emerald Green Theme) */}
           <button
             type="button"
             onClick={() => setShowGoogleModal(true)}
-            className="group text-left bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-emerald-400 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
+            className="group text-left bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] hover:border-emerald-500 rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between transition-all duration-200 active:scale-[0.97] shadow-sm hover:shadow"
           >
             <div>
               {/* 3D Avatar */}
               <div className="flex justify-center mb-1">
                 <StudentAvatar3D size={48} />
               </div>
-              <h3 className="text-xs font-bold text-slate-900 group-hover:text-emerald-900 transition leading-tight">
+              <h3 className="text-xs font-bold text-slate-900 group-hover:text-emerald-800 transition leading-tight">
                 Siswa
               </h3>
-              <p className="text-[9.5px] text-slate-500 mt-1 leading-tight line-clamp-2">
+              <p className="text-[9.5px] text-slate-600 mt-1 leading-tight line-clamp-2">
                 Belajar dan kembangkan kemampuanmu.
               </p>
             </div>
-            {/* Round Action Button */}
+            {/* Round Action Button in Emerald Green */}
             <div className="w-5 h-5 rounded-full bg-[#059669] group-hover:bg-[#047857] text-white flex items-center justify-center self-end mt-2 shadow-sm transition">
               <ArrowRight size={11} strokeWidth={2.5} />
             </div>
@@ -210,7 +210,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         {/* 4. DIVIDER WITH TEXT */}
         <div className="relative my-3.5 flex items-center justify-center">
           <div className="w-full border-t border-slate-200" />
-          <span className="absolute bg-white px-2.5 text-[10.5px] font-medium text-slate-400">
+          <span className="absolute bg-white px-2.5 text-[10.5px] font-semibold text-[#047857]">
             Atau masuk langsung sebagai Siswa
           </span>
         </div>
@@ -221,7 +221,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             type="button"
             disabled={isLoading}
             onClick={() => setShowGoogleModal(true)}
-            className="w-full bg-white hover:bg-blue-50/40 border-2 border-[#BFDBFE] hover:border-blue-500 rounded-2xl py-3 px-4 shadow-sm shadow-blue-900/5 active:scale-[0.98] transition flex items-center justify-between group"
+            className="w-full bg-white hover:bg-emerald-50/40 border-2 border-emerald-300 hover:border-emerald-600 rounded-2xl py-3 px-4 shadow-sm shadow-emerald-900/5 active:scale-[0.98] transition flex items-center justify-between group"
           >
             {/* Google "G" Icon */}
             <div className="w-6 h-6 shrink-0 flex items-center justify-center">
@@ -246,17 +246,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             </div>
 
             {/* Label */}
-            <span className="text-xs sm:text-sm font-bold text-[#1D4ED8] group-hover:text-blue-800 transition">
+            <span className="text-xs sm:text-sm font-bold text-[#047857] group-hover:text-[#065F46] transition">
               Lanjutkan dengan Google
             </span>
 
-            {/* Chevron Right */}
-            <ChevronRight size={18} className="text-blue-500 group-hover:translate-x-0.5 transition-transform" />
+            {/* Chevron Right in Emerald */}
+            <ChevronRight size={18} className="text-[#059669] group-hover:translate-x-0.5 transition-transform" />
           </button>
 
           {/* Subtext */}
-          <p className="text-[10px] text-slate-400 text-center mt-1.5">
-            Gunakan akun <span className="font-semibold text-slate-600">Google / Gmail</span> yang kamu miliki
+          <p className="text-[10px] text-slate-500 text-center mt-1.5">
+            Gunakan akun <span className="font-bold text-[#DC2626]">Google / Gmail</span> yang kamu miliki
           </p>
         </div>
       </div>
@@ -274,8 +274,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                     activeStaffModal === 'ADMIN'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-purple-100 text-purple-700'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-rose-100 text-rose-700'
                   }`}
                 >
                   {activeStaffModal === 'ADMIN' ? (
@@ -290,7 +290,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                       ? 'Masuk Portal Administrator'
                       : 'Masuk Portal Guru'}
                   </h3>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-[10px] text-emerald-800 font-semibold">
                     PKBM Bina Insani • Sistem Internal
                   </p>
                 </div>
@@ -317,7 +317,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                       setStaffEmail('admin@pkbmbinainsani.sch.id');
                       setStaffPassword('Admin123!');
                     }}
-                    className="px-2 py-1 bg-white hover:bg-blue-50 border border-slate-300 hover:border-blue-400 rounded-lg text-[10px] font-bold text-blue-800 transition"
+                    className="px-2 py-1 bg-white hover:bg-red-50 border border-slate-300 hover:border-red-400 rounded-lg text-[10px] font-bold text-red-800 transition"
                   >
                     Administrator Utama
                   </button>
@@ -329,7 +329,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                         setStaffEmail('guru.budi@pkbmbinainsani.sch.id');
                         setStaffPassword('Guru123!');
                       }}
-                      className="px-2 py-1 bg-white hover:bg-purple-50 border border-slate-300 hover:border-purple-400 rounded-lg text-[10px] font-bold text-purple-800 transition"
+                      className="px-2 py-1 bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-400 rounded-lg text-[10px] font-bold text-rose-800 transition"
                     >
                       Guru Budi (Wali Kelas)
                     </button>
@@ -339,7 +339,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                         setStaffEmail('guru.siti@pkbmbinainsani.sch.id');
                         setStaffPassword('Guru123!');
                       }}
-                      className="px-2 py-1 bg-white hover:bg-purple-50 border border-slate-300 hover:border-purple-400 rounded-lg text-[10px] font-bold text-purple-800 transition"
+                      className="px-2 py-1 bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-400 rounded-lg text-[10px] font-bold text-rose-800 transition"
                     >
                       Guru Siti (Pengajar)
                     </button>
@@ -363,7 +363,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                     onChange={(e) => setStaffEmail(e.target.value)}
                     placeholder="nama@pkbmbinainsani.sch.id"
                     disabled={isLoading}
-                    className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-blue-600 transition"
+                    className="w-full bg-white text-slate-900 pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-red-600 transition"
                   />
                 </div>
               </div>
@@ -381,7 +381,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                     onChange={(e) => setStaffPassword(e.target.value)}
                     placeholder="Masukkan kata sandi"
                     disabled={isLoading}
-                    className="w-full bg-white text-slate-900 pl-9 pr-9 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-blue-600 transition"
+                    className="w-full bg-white text-slate-900 pl-9 pr-9 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-red-600 transition"
                   />
                   <button
                     type="button"
@@ -398,8 +398,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 disabled={isLoading}
                 className={`w-full text-white font-bold text-xs py-3 rounded-xl shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2 mt-2 ${
                   activeStaffModal === 'ADMIN'
-                    ? 'bg-[#1E3A8A] hover:bg-blue-900 shadow-blue-900/20'
-                    : 'bg-[#9333EA] hover:bg-purple-800 shadow-purple-900/20'
+                    ? 'bg-[#DC2626] hover:bg-[#B91C1C] shadow-red-900/20'
+                    : 'bg-[#E11D48] hover:bg-[#BE123C] shadow-rose-900/20'
                 }`}
               >
                 {isLoading ? (
@@ -464,7 +464,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               <button
                 type="button"
                 onClick={() => handleGoogleSignIn('siswa.ahmad@gmail.com', 'Ahmad Fauzi')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition text-left"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition text-left"
               >
                 <img
                   src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150"
@@ -474,7 +474,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-slate-800 truncate">Ahmad Fauzi</span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700 font-semibold">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
                       Aktif (X-A)
                     </span>
                   </div>
@@ -488,7 +488,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               <button
                 type="button"
                 onClick={() => handleGoogleSignIn('dewi.lestari@gmail.com', 'Dewi Lestari')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition text-left"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition text-left"
               >
                 <img
                   src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150"
@@ -498,7 +498,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-slate-800 truncate">Dewi Lestari</span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700 font-semibold">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
                       Aktif (XI-B)
                     </span>
                   </div>
@@ -512,23 +512,23 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               <button
                 type="button"
                 onClick={() => handleGoogleSignIn('rian.baru@gmail.com', 'Rian Firmansyah')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-amber-300 bg-amber-50/40 hover:border-amber-500 hover:bg-amber-50 transition text-left"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-red-300 bg-red-50/40 hover:border-red-500 hover:bg-red-50 transition text-left"
               >
                 <img
                   src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
                   alt="Rian Firmansyah"
-                  className="w-9 h-9 rounded-full object-cover border border-amber-200"
+                  className="w-9 h-9 rounded-full object-cover border border-red-200"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-slate-900 truncate">
                       Rian Firmansyah
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-red-100 text-red-800 font-bold">
                       Siswa Baru
                     </span>
                   </div>
-                  <span className="text-[11px] text-amber-800 block truncate">
+                  <span className="text-[11px] text-red-700 block truncate">
                     rian.baru@gmail.com (Aktivasi Kode Kelas)
                   </span>
                 </div>
@@ -546,7 +546,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                   placeholder="email.siswa@gmail.com"
                   value={customGoogleEmail}
                   onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-600"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600"
                 />
                 <button
                   type="button"
@@ -555,7 +555,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                       handleGoogleSignIn(customGoogleEmail);
                     }
                   }}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+                  className="px-3 py-1.5 bg-[#047857] text-white rounded-lg text-xs font-bold hover:bg-[#065F46]"
                 >
                   Pilih
                 </button>

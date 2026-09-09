@@ -1,10 +1,10 @@
 export const Colors = {
-  primary: '#1E3A8A', // Navy Blue
-  primaryDark: '#172554',
-  primaryLight: '#3B82F6',
-  secondary: '#0284C7', // Azure
-  accent: '#059669', // Emerald
-  accentLight: '#D1FAE5',
+  primary: '#047857', // Emerald Green
+  primaryDark: '#064E3B',
+  primaryLight: '#059669',
+  secondary: '#DC2626', // Ruby Red
+  accent: '#DC2626', // Red
+  accentLight: '#FEE2E2',
   background: '#F8FAFC', // Slate 50
   card: '#FFFFFF',
   surface: '#F1F5F9',
@@ -20,10 +20,10 @@ export const Colors = {
   warning: '#F59E0B',
   warningLight: '#FEF3C7',
   roles: {
-    admin: '#7C3AED', // Purple
-    adminLight: '#EDE9FE',
-    teacher: '#0284C7', // Blue
-    teacherLight: '#E0F2FE',
+    admin: '#DC2626', // Red
+    adminLight: '#FEE2E2',
+    teacher: '#E11D48', // Crimson/Rose
+    teacherLight: '#FFE4E6',
     student: '#059669', // Green
     studentLight: '#D1FAE5',
   },

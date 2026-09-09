@@ -2,19 +2,19 @@
 // Motto: Hebat • Mandiri • Kreatif
 
 export const Colors = {
-  // Brand Colors
-  primary: '#1E3A8A', // Deep Academic Navy
-  primaryDark: '#0F172A', // Deep Midnight
-  primaryLight: '#2563EB', // Vibrant Royal Blue
-  primarySoft: '#EFF6FF', // Soft Blue tint
+  // Brand Colors (Hijau & Merah - PKBM Bina Insani)
+  primary: '#047857', // Emerald / Forest Green
+  primaryDark: '#064E3B', // Deep Forest Green
+  primaryLight: '#059669', // Vibrant Emerald
+  primarySoft: '#F0FDF4', // Soft Mint Green tint
 
-  secondary: '#0284C7', // Sky Blue
-  secondaryLight: '#E0F2FE',
+  secondary: '#DC2626', // Ruby Red
+  secondaryLight: '#FEF2F2', // Soft Red tint
 
   // Accent Colors
-  accent: '#059669', // Emerald / Mint Green (Growth & Learning)
-  accentLight: '#D1FAE5',
-  accentDark: '#047857',
+  accent: '#DC2626', // Vibrant Red (Courage & Passion)
+  accentLight: '#FEE2E2',
+  accentDark: '#B91C1C',
 
   amber: '#D97706', // Warm Amber (Creativity & Focus)
   amberLight: '#FEF3C7',

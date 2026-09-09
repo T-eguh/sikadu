@@ -20,14 +20,14 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
       {/* Top Device & Platform Selector Bar */}
       <div className="flex items-center gap-3 mb-4 bg-slate-800/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700 shadow-lg text-xs">
         <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-          <Smartphone size={14} className="text-sky-400" />
+          <Smartphone size={14} className="text-emerald-400" />
           <span>Simulator Mobile:</span>
         </div>
         <button
           onClick={() => onDeviceChange('ios')}
           className={`px-3 py-1 rounded-full font-semibold transition-all ${
             device === 'ios'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-[#047857] text-white shadow-sm'
               : 'text-slate-300 hover:text-white'
           }`}
         >
@@ -37,7 +37,7 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
           onClick={() => onDeviceChange('android')}
           className={`px-3 py-1 rounded-full font-semibold transition-all ${
             device === 'android'
-              ? 'bg-emerald-600 text-white shadow-sm'
+              ? 'bg-[#DC2626] text-white shadow-sm'
               : 'text-slate-300 hover:text-white'
           }`}
         >
