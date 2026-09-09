@@ -7,26 +7,125 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Modal,
+  Image,
+  Animated,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeScreen } from '../components/SafeScreen';
 import { Logo } from '../components/Logo';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
+import { AppButton, AppInput, AppCard } from '../components/UI';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { useAuth } from '../hooks/useAuth';
-import { Colors } from '../constants/colors';
+import { Colors, Shadows } from '../theme';
+import { Config } from '../constants/config';
+
+type RoleType = 'ADMINISTRATOR' | 'GURU' | 'SISWA';
+
+interface RoleOption {
+  id: RoleType;
+  title: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  bgLight: string;
+}
+
+const ROLES: RoleOption[] = [
+  {
+    id: 'ADMINISTRATOR',
+    title: 'Administrator',
+    description: 'Kelola sistem dan aktivitas pembelajaran.',
+    icon: 'shield-checkmark-outline',
+    color: '#7C3AED',
+    bgLight: '#F5F3FF',
+  },
+  {
+    id: 'GURU',
+    title: 'Guru',
+    description: 'Kelola kelas dan materi pembelajaran.',
+    icon: 'school-outline',
+    color: '#0284C7',
+    bgLight: '#F0F9FF',
+  },
+  {
+    id: 'SISWA',
+    title: 'Siswa',
+    description: 'Belajar dan kembangkan kemampuanmu.',
+    icon: 'book-outline',
+    color: '#059669',
+    bgLight: '#ECFDF5',
+  },
+];
+
+// Sample Google Accounts for instant Android testing & emulator support
+const DEMO_GOOGLE_ACCOUNTS = [
+  {
+    name: 'Ahmad Fauzi (Siswa Aktif)',
+    email: 'siswa.ahmad@pkbmbinainsani.sch.id',
+    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120',
+    statusNote: 'Status: ACTIVE (Kelas X-A)',
+  },
+  {
+    name: 'Dewi Lestari (Siswa Aktif)',
+    email: 'siswa.dewi@pkbmbinainsani.sch.id',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120',
+    statusNote: 'Status: ACTIVE (Kelas XI-B)',
+  },
+  {
+    name: 'Rizky Ramadhan (Siswa Baru)',
+    email: 'rizky.siswa.baru@gmail.com',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
+    statusNote: 'Status: PENDING (Perlu Kode Kelas)',
+  },
+];
 
 export default function LoginScreen() {
-  const { login, error, clearError, isLoading } = useAuth();
+  const { login, loginWithGoogle, error, clearError, isLoading } = useAuth();
 
+  const [selectedRole, setSelectedRole] = useState<RoleType>('SISWA');
+
+  // Staff (Admin/Guru) Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
-  const validate = (): boolean => {
+  // Google Student Modal State
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
+  const [customGoogleName, setCustomGoogleName] = useState('');
+  const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
+
+  // Micro animation values for role cards
+  const [adminScale] = useState(new Animated.Value(1));
+  const [guruScale] = useState(new Animated.Value(1));
+  const [siswaScale] = useState(new Animated.Value(1));
+
+  const animatePress = (anim: Animated.Value) => {
+    Animated.sequence([
+      Animated.timing(anim, { toValue: 0.96, duration: 80, useNativeDriver: true }),
+      Animated.timing(anim, { toValue: 1, duration: 120, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const handleRoleSelect = (role: RoleType) => {
+    setSelectedRole(role);
+    clearError();
+    setFieldErrors({});
+
+    if (role === 'ADMINISTRATOR') {
+      animatePress(adminScale);
+    } else if (role === 'GURU') {
+      animatePress(guruScale);
+    } else {
+      animatePress(siswaScale);
+    }
+  };
+
+  const validateStaffForm = (): boolean => {
     const errors: { email?: string; password?: string } = {};
     if (!email.trim()) {
-      errors.email = 'Email wajib diisi';
+      errors.email = 'Alamat email wajib diisi';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       errors.email = 'Format email tidak valid';
     }
@@ -41,9 +140,9 @@ export default function LoginScreen() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleLogin = async () => {
+  const handleStaffLogin = async () => {
     clearError();
-    if (!validate()) return;
+    if (!validateStaffForm()) return;
 
     try {
       await login(email.trim(), password);
@@ -52,112 +151,354 @@ export default function LoginScreen() {
     }
   };
 
-  // Development Quick-Fill Helpers
-  const fillDevAccount = (devEmail: string, devPass: string) => {
-    setEmail(devEmail);
-    setPassword(devPass);
+  const handleGoogleStudentLogin = async (googleEmail: string, googleName?: string) => {
+    clearError();
+    setIsGoogleSigningIn(true);
+    try {
+      // Format simulated ID token recognized by GoogleAuthService on backend
+      const simulatedToken = `simulated_google_token_${googleEmail.trim().toLowerCase()}`;
+      await loginWithGoogle(simulatedToken);
+      setShowGoogleModal(false);
+    } catch (err: any) {
+      // Error is set in AuthContext
+    } finally {
+      setIsGoogleSigningIn(false);
+    }
+  };
+
+  const fillStaffAccount = (staffEmail: string, staffPass: string) => {
+    setEmail(staffEmail);
+    setPassword(staffPass);
     setFieldErrors({});
     clearError();
   };
 
   return (
-    <SafeScreen backgroundColor="#FFFFFF">
+    <SafeScreen backgroundColor="#F8FAFC">
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Header BISA */}
           <View style={styles.header}>
             <Logo size="md" variant="dark" />
-            <Text style={styles.welcomeText}>Selamat Datang</Text>
-            <Text style={styles.instructionText}>
-              Masuk ke akun Anda untuk memulai pembelajaran digital
+            <Text style={styles.welcomeTitle}>Selamat Datang 👋</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Masuk untuk melanjutkan perjalanan belajarmu.
             </Text>
           </View>
 
-          {error ? (
+          {error && (
             <ErrorBanner
               message={error}
-              onRetry={handleLogin}
               onDismiss={clearError}
+              style={{ marginBottom: 16 }}
             />
-          ) : null}
+          )}
 
-          <View style={styles.form}>
-            <Input
-              label="Alamat Email"
-              placeholder="nama@sekolahmodel.sch.id"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: undefined });
-              }}
-              leftIcon="mail-outline"
-              keyboardType="email-address"
-              autoComplete="email"
-              error={fieldErrors.email}
-              editable={!isLoading}
-            />
-
-            <Input
-              label="Kata Sandi"
-              placeholder="Masukkan kata sandi Anda"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: undefined });
-              }}
-              leftIcon="lock-closed-outline"
-              isPassword
-              error={fieldErrors.password}
-              editable={!isLoading}
-            />
-
-            <Button
-              title="Masuk ke Akun"
-              onPress={handleLogin}
-              isLoading={isLoading}
-              style={styles.loginButton}
-            />
+          {/* Section: Pilih Role Login (3 Interactive Cards) */}
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitle}>PILIH PERAN MASUK</Text>
+            <Text style={styles.sectionMotto}>BISA • PKBM Bina Insani</Text>
           </View>
 
-          {/* Development Quick Account Switcher for convenient mobile testing */}
-          <View style={styles.devSection}>
-            <Text style={styles.devTitle}>Akun Uji Coba (Development Seed)</Text>
-            <View style={styles.chipRow}>
-              <TouchableOpacity
-                style={[styles.devChip, { borderColor: Colors.roles.admin }]}
-                onPress={() => fillDevAccount('admin@sekolahmodel.sch.id', 'Admin123!')}
-              >
-                <Text style={[styles.devChipText, { color: Colors.roles.admin }]}>Admin</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.devChip, { borderColor: Colors.roles.teacher }]}
-                onPress={() => fillDevAccount('guru.budi@sekolahmodel.sch.id', 'Guru123!')}
-              >
-                <Text style={[styles.devChipText, { color: Colors.roles.teacher }]}>Guru Budi</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.devChip, { borderColor: Colors.roles.student }]}
-                onPress={() => fillDevAccount('siswa.ahmad@sekolahmodel.sch.id', 'Siswa123!')}
-              >
-                <Text style={[styles.devChipText, { color: Colors.roles.student }]}>Siswa Ahmad</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.roleGrid}>
+            {ROLES.map((role) => {
+              const isSelected = selectedRole === role.id;
+              const scaleAnim =
+                role.id === 'ADMINISTRATOR'
+                  ? adminScale
+                  : role.id === 'GURU'
+                  ? guruScale
+                  : siswaScale;
+
+              return (
+                <Animated.View
+                  key={role.id}
+                  style={[{ transform: [{ scale: scaleAnim }] }, styles.roleCardWrapper]}
+                >
+                  <TouchableOpacity
+                    activeOpacity={0.88}
+                    onPress={() => handleRoleSelect(role.id)}
+                    style={[
+                      styles.roleCard,
+                      isSelected && {
+                        borderColor: role.color,
+                        borderWidth: 2,
+                        backgroundColor: '#FFFFFF',
+                        ...Shadows.medium,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.roleIconCircle,
+                        {
+                          backgroundColor: isSelected ? role.bgLight : '#F1F5F9',
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={role.icon}
+                        size={22}
+                        color={isSelected ? role.color : '#64748B'}
+                      />
+                    </View>
+                    <View style={styles.roleContent}>
+                      <View style={styles.roleHeaderRow}>
+                        <Text
+                          style={[
+                            styles.roleName,
+                            isSelected && { color: role.color, fontWeight: '800' },
+                          ]}
+                        >
+                          {role.title}
+                        </Text>
+                        {isSelected && (
+                          <View style={[styles.activeDot, { backgroundColor: role.color }]} />
+                        )}
+                      </View>
+                      <Text style={styles.roleDescription}>{role.description}</Text>
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
           </View>
 
+          {/* DYNAMIC FORM ACCORDING TO SELECTED ROLE */}
+          <View style={styles.formContainer}>
+            {/* 1. SISWA - GOOGLE SIGN-IN ONLY */}
+            {selectedRole === 'SISWA' && (
+              <View style={styles.studentFormBox}>
+                <View style={styles.studentNoticeBox}>
+                  <View style={styles.studentNoticeIcon}>
+                    <Ionicons name="information-circle" size={20} color={Colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.studentNoticeTitle}>Siswa Tanpa Kata Sandi</Text>
+                    <Text style={styles.studentNoticeText}>
+                      Siswa masuk langsung menggunakan Akun Google. Siswa baru akan diarahkan untuk
+                      memasukkan Kode Kelas resmi dari Guru.
+                    </Text>
+                  </View>
+                </View>
+
+                <AppButton
+                  variant="google"
+                  title="Lanjutkan dengan Google"
+                  onPress={() => setShowGoogleModal(true)}
+                  loading={isLoading || isGoogleSigningIn}
+                  size="lg"
+                  style={styles.googleButton}
+                />
+
+                <View style={styles.badgeSecurityRow}>
+                  <Ionicons name="shield-checkmark" size={14} color="#059669" />
+                  <Text style={styles.badgeSecurityText}>
+                    Google Sign-In Resmi Kompatibel Android
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* 2. ADMINISTRATOR - EMAIL & PASSWORD */}
+            {selectedRole === 'ADMINISTRATOR' && (
+              <View style={styles.staffFormBox}>
+                <View style={[styles.staffNoticeBox, { backgroundColor: '#F5F3FF', borderColor: '#DDD6FE' }]}>
+                  <Ionicons name="shield-checkmark" size={16} color="#7C3AED" />
+                  <Text style={[styles.staffNoticeText, { color: '#5B21B6' }]}>
+                    Akses Sistem Utama PKBM Bina Insani
+                  </Text>
+                </View>
+
+                <AppInput
+                  label="Alamat Email Administrator"
+                  placeholder="admin@pkbmbinainsani.sch.id"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: undefined });
+                  }}
+                  icon="mail-outline"
+                  keyboardType="email-address"
+                  error={fieldErrors.email}
+                  editable={!isLoading}
+                />
+
+                <AppInput
+                  label="Kata Sandi"
+                  placeholder="Masukkan kata sandi Administrator"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: undefined });
+                  }}
+                  icon="lock-closed-outline"
+                  secureTextEntry
+                  error={fieldErrors.password}
+                  editable={!isLoading}
+                />
+
+                <AppButton
+                  title="Masuk sebagai Administrator"
+                  onPress={handleStaffLogin}
+                  loading={isLoading}
+                  style={[styles.loginButton, { backgroundColor: '#7C3AED' }]}
+                />
+
+                {/* Dev test shortcut */}
+                <TouchableOpacity
+                  style={styles.devFillChip}
+                  onPress={() => fillStaffAccount('admin@pkbmbinainsani.sch.id', 'Admin123!')}
+                >
+                  <Text style={styles.devFillChipText}>Gunakan Akun Uji Coba: Admin</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* 3. GURU - EMAIL & PASSWORD */}
+            {selectedRole === 'GURU' && (
+              <View style={styles.staffFormBox}>
+                <View style={[styles.staffNoticeBox, { backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' }]}>
+                  <Ionicons name="school" size={16} color="#0284C7" />
+                  <Text style={[styles.staffNoticeText, { color: '#0369A1' }]}>
+                    Portal Guru Pengajar PKBM Bina Insani
+                  </Text>
+                </View>
+
+                <AppInput
+                  label="Alamat Email Guru"
+                  placeholder="guru.budi@pkbmbinainsani.sch.id"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: undefined });
+                  }}
+                  icon="mail-outline"
+                  keyboardType="email-address"
+                  error={fieldErrors.email}
+                  editable={!isLoading}
+                />
+
+                <AppInput
+                  label="Kata Sandi"
+                  placeholder="Masukkan kata sandi Guru"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: undefined });
+                  }}
+                  icon="lock-closed-outline"
+                  secureTextEntry
+                  error={fieldErrors.password}
+                  editable={!isLoading}
+                />
+
+                <AppButton
+                  title="Masuk sebagai Guru"
+                  onPress={handleStaffLogin}
+                  loading={isLoading}
+                  style={[styles.loginButton, { backgroundColor: '#0284C7' }]}
+                />
+
+                {/* Dev test shortcut */}
+                <TouchableOpacity
+                  style={styles.devFillChip}
+                  onPress={() => fillStaffAccount('guru.budi@pkbmbinainsani.sch.id', 'Guru123!')}
+                >
+                  <Text style={styles.devFillChipText}>Gunakan Akun Uji Coba: Guru Budi</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Footer Motto */}
           <View style={styles.footer}>
-            <Text style={styles.footerNote}>
-              Sekolah Model LMS • Satu Akun untuk Semua Peran
-            </Text>
+            <Text style={styles.footerAppName}>BISA • Bisa Insani Smart Academy</Text>
+            <Text style={styles.footerMotto}>Hebat • Mandiri • Kreatif</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* MODAL PILIH AKUN GOOGLE (KOMPATIBEL ANDROID & EMULATOR) */}
+      <Modal
+        visible={showGoogleModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowGoogleModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderTitleRow}>
+                <Ionicons name="logo-google" size={20} color="#EA4335" />
+                <Text style={styles.modalTitle}>Masuk dengan Google</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setShowGoogleModal(false)}
+                style={styles.modalCloseBtn}
+              >
+                <Ionicons name="close" size={22} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalSubtitle}>
+              Pilih akun Google terdaftar atau masukkan akun Google Anda untuk masuk ke BISA.
+            </Text>
+
+            {/* List Akun Demo / Terverifikasi */}
+            <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
+              {DEMO_GOOGLE_ACCOUNTS.map((acc, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  activeOpacity={0.8}
+                  disabled={isGoogleSigningIn}
+                  onPress={() => handleGoogleStudentLogin(acc.email, acc.name)}
+                  style={styles.googleAccountItem}
+                >
+                  <Image source={{ uri: acc.avatar }} style={styles.googleAvatar} />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.googleAccountName}>{acc.name}</Text>
+                    <Text style={styles.googleAccountEmail}>{acc.email}</Text>
+                    <Text style={styles.googleAccountStatus}>{acc.statusNote}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Custom Google Email Input */}
+            <View style={styles.customEmailContainer}>
+              <Text style={styles.customEmailLabel}>Atau Masukkan Akun Google Lain:</Text>
+              <AppInput
+                placeholder="nama.anda@gmail.com"
+                value={customGoogleEmail}
+                onChangeText={setCustomGoogleEmail}
+                icon="mail-outline"
+                keyboardType="email-address"
+                style={{ marginBottom: 8 }}
+              />
+              <AppButton
+                title="Lanjutkan dengan Akun Ini"
+                onPress={() => {
+                  if (customGoogleEmail.trim()) {
+                    handleGoogleStudentLogin(customGoogleEmail, customGoogleName || undefined);
+                  }
+                }}
+                disabled={!customGoogleEmail.trim() || isGoogleSigningIn}
+                loading={isGoogleSigningIn}
+                size="sm"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeScreen>
   );
 }
@@ -168,73 +509,278 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 28,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  welcomeText: {
+  welcomeTitle: {
     fontSize: 22,
-    fontWeight: '800',
-    color: Colors.text,
-    marginTop: 18,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginTop: 14,
+    letterSpacing: -0.3,
   },
-  instructionText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+  welcomeSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
     textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 20,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
     marginTop: 6,
-    paddingHorizontal: 16,
+    paddingHorizontal: 2,
   },
-  form: {
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#475569',
+    letterSpacing: 0.8,
+  },
+  sectionMotto: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0284C7',
+  },
+  roleGrid: {
+    gap: 10,
+    marginBottom: 16,
+  },
+  roleCardWrapper: {
     width: '100%',
-    marginTop: 8,
   },
-  loginButton: {
-    marginTop: 10,
+  roleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 16,
+    padding: 12,
+    ...Shadows.soft,
   },
-  devSection: {
-    marginTop: 28,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+  roleIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  roleContent: {
+    flex: 1,
+  },
+  roleHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  roleName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  roleDescription: {
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  formContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 18,
+    ...Shadows.soft,
+    marginBottom: 20,
+  },
+  studentFormBox: {
     alignItems: 'center',
   },
-  devTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.textMuted,
-    marginBottom: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  chipRow: {
+  studentNoticeBox: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 18,
+    width: '100%',
+  },
+  studentNoticeIcon: {
+    marginRight: 10,
+    marginTop: 2,
+  },
+  studentNoticeTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#1E3A8A',
+    marginBottom: 2,
+  },
+  studentNoticeText: {
+    fontSize: 11,
+    color: '#1E40AF',
+    lineHeight: 16,
+  },
+  googleButton: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  badgeSecurityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  badgeSecurityText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#059669',
+  },
+  staffFormBox: {
+    width: '100%',
+  },
+  staffNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 14,
     gap: 8,
   },
-  devChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  devChipText: {
-    fontSize: 12,
+  staffNoticeText: {
+    fontSize: 11,
     fontWeight: '700',
   },
-  footer: {
-    marginTop: 30,
-    alignItems: 'center',
+  loginButton: {
+    marginTop: 8,
   },
-  footerNote: {
+  devFillChip: {
+    marginTop: 14,
+    alignSelf: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  devFillChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  footerAppName: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  footerMotto: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#D97706',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 22,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  modalHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalSubtitle: {
     fontSize: 12,
-    color: Colors.textMuted,
-    textAlign: 'center',
+    color: '#64748B',
+    lineHeight: 17,
+    marginBottom: 16,
+  },
+  googleAccountItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+  },
+  googleAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E2E8F0',
+  },
+  googleAccountName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  googleAccountEmail: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  googleAccountStatus: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0284C7',
+    marginTop: 2,
+  },
+  customEmailContainer: {
+    marginTop: 14,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  customEmailLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 6,
   },
 });

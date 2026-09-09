@@ -1,4 +1,20 @@
 export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT';
+export type StudentStatus = 'PENDING' | 'ACTIVE' | 'INACTIVE' | 'REJECTED';
+export type AuthProvider = 'LOCAL' | 'GOOGLE';
+
+export interface ClassInvitationCode {
+  id: string;
+  code: string;
+  classId: string;
+  className?: string;
+  academicYearId: string;
+  isActive: boolean;
+  maxUses?: number | null;
+  usedCount: number;
+  expiresAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface User {
   id: string;
@@ -14,8 +30,12 @@ export interface User {
   } | null;
   student?: {
     id: string;
-    studentNumber: string;
-    nisn: string;
+    studentNumber?: string | null;
+    nisn?: string | null;
+    googleId?: string | null;
+    authProvider?: AuthProvider;
+    status?: StudentStatus;
+    profilePhotoUrl?: string | null;
   } | null;
 }
 

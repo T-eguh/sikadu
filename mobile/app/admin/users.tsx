@@ -14,14 +14,14 @@ import { useProtectedRoute } from '../../hooks/useProtectedRoute';
 import { Colors } from '../../constants/colors';
 
 const initialUsers = [
-  { id: '1', name: 'Administrator Utama', email: 'admin@sekolahmodel.sch.id', role: 'ADMIN', badge: 'Admin' },
-  { id: '2', name: 'Budi Santoso, S.Pd.', email: 'guru.budi@sekolahmodel.sch.id', role: 'TEACHER', badge: 'NIP: 198501152010011001' },
-  { id: '3', name: 'Siti Rahmawati, M.Pd.', email: 'guru.siti@sekolahmodel.sch.id', role: 'TEACHER', badge: 'NIP: 198803202012022002' },
-  { id: '4', name: 'Ahmad Fauzi', email: 'siswa.ahmad@sekolahmodel.sch.id', role: 'STUDENT', badge: 'NIS: 24001' },
-  { id: '5', name: 'Dewi Lestari', email: 'siswa.dewi@sekolahmodel.sch.id', role: 'STUDENT', badge: 'NIS: 24002' },
-  { id: '6', name: 'Reza Pratama', email: 'siswa.reza@sekolahmodel.sch.id', role: 'STUDENT', badge: 'NIS: 24003' },
-  { id: '7', name: 'Anisa Nurul', email: 'siswa.anisa@sekolahmodel.sch.id', role: 'STUDENT', badge: 'NIS: 24004' },
-  { id: '8', name: 'Fajar Hidayat', email: 'siswa.fajar@sekolahmodel.sch.id', role: 'STUDENT', badge: 'NIS: 24005' },
+  { id: '1', name: 'Administrator Utama', email: 'admin@pkbmbinainsani.sch.id', role: 'ADMIN', badge: 'Admin' },
+  { id: '2', name: 'Budi Santoso, S.Pd.', email: 'guru.budi@pkbmbinainsani.sch.id', role: 'TEACHER', badge: 'NIP: 198501152010011001' },
+  { id: '3', name: 'Siti Rahmawati, M.Pd.', email: 'guru.siti@pkbmbinainsani.sch.id', role: 'TEACHER', badge: 'NIP: 198803202012022002' },
+  { id: '4', name: 'Ahmad Fauzi', email: 'siswa.ahmad@pkbmbinainsani.sch.id', role: 'STUDENT', badge: 'NIS: 24001' },
+  { id: '5', name: 'Dewi Lestari', email: 'siswa.dewi@pkbmbinainsani.sch.id', role: 'STUDENT', badge: 'NIS: 24002' },
+  { id: '6', name: 'Reza Pratama', email: 'siswa.reza@pkbmbinainsani.sch.id', role: 'STUDENT', badge: 'NIS: 24003' },
+  { id: '7', name: 'Anisa Nurul', email: 'siswa.anisa@pkbmbinainsani.sch.id', role: 'STUDENT', badge: 'NIS: 24004' },
+  { id: '8', name: 'Fajar Hidayat', email: 'siswa.fajar@pkbmbinainsani.sch.id', role: 'STUDENT', badge: 'NIS: 24005' },
 ];
 
 export default function AdminUsersScreen() {

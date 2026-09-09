@@ -5,9 +5,22 @@ import { LoginResponse, UserRole } from '../types';
 
 export class AuthService {
   static async login(email: string, password: string): Promise<LoginResponse> {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const cleanEmail = email.toLowerCase().trim();
+    const alternativeEmail = cleanEmail.endsWith('@pkbmbinainsani.sch.id')
+      ? cleanEmail.replace('@pkbmbinainsani.sch.id', '@sekolahmodel.sch.id')
+      : cleanEmail.endsWith('@sekolahmodel.sch.id')
+      ? cleanEmail.replace('@sekolahmodel.sch.id', '@pkbmbinainsani.sch.id')
+      : null;
+
+    let user = await prisma.user.findUnique({
+      where: { email: cleanEmail },
     });
+
+    if (!user && alternativeEmail) {
+      user = await prisma.user.findUnique({
+        where: { email: alternativeEmail },
+      });
+    }
 
     if (!user) {
       const error: any = new Error('Email atau kata sandi tidak valid.');

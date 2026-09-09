@@ -25,7 +25,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       name: 'Administrator Utama',
-      email: 'admin@sekolahmodel.sch.id',
+      email: 'admin@pkbmbinainsani.sch.id',
       password: adminPassword,
       role: Role.ADMIN,
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
@@ -38,7 +38,7 @@ async function main() {
   const teacher1 = await prisma.user.create({
     data: {
       name: 'Budi Santoso, S.Pd.',
-      email: 'guru.budi@sekolahmodel.sch.id',
+      email: 'guru.budi@pkbmbinainsani.sch.id',
       password: teacherPassword,
       role: Role.TEACHER,
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
@@ -54,7 +54,7 @@ async function main() {
   const teacher2 = await prisma.user.create({
     data: {
       name: 'Siti Rahmawati, M.Pd.',
-      email: 'guru.siti@sekolahmodel.sch.id',
+      email: 'guru.siti@pkbmbinainsani.sch.id',
       password: teacherPassword,
       role: Role.TEACHER,
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
@@ -72,35 +72,35 @@ async function main() {
   const studentsData = [
     {
       name: 'Ahmad Fauzi',
-      email: 'siswa.ahmad@sekolahmodel.sch.id',
+      email: 'siswa.ahmad@pkbmbinainsani.sch.id',
       studentNumber: '24001',
       nisn: '0071234561',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
     },
     {
       name: 'Dewi Lestari',
-      email: 'siswa.dewi@sekolahmodel.sch.id',
+      email: 'siswa.dewi@pkbmbinainsani.sch.id',
       studentNumber: '24002',
       nisn: '0071234562',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
     },
     {
       name: 'Reza Pratama',
-      email: 'siswa.reza@sekolahmodel.sch.id',
+      email: 'siswa.reza@pkbmbinainsani.sch.id',
       studentNumber: '24003',
       nisn: '0071234563',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
     },
     {
       name: 'Anisa Nurul',
-      email: 'siswa.anisa@sekolahmodel.sch.id',
+      email: 'siswa.anisa@pkbmbinainsani.sch.id',
       studentNumber: '24004',
       nisn: '0071234564',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
     },
     {
       name: 'Fajar Hidayat',
-      email: 'siswa.fajar@sekolahmodel.sch.id',
+      email: 'siswa.fajar@pkbmbinainsani.sch.id',
       studentNumber: '24005',
       nisn: '0071234565',
       avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',

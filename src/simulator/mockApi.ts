@@ -1,10 +1,10 @@
-import { User, Role, AcademicYear, Subject, ClassItem, TeachingAssignment, ModuleItem, ModuleContent, ModuleStatus, ContentType } from './types';
+import { User, Role, AcademicYear, Subject, ClassItem, TeachingAssignment, ModuleItem, ModuleContent, ModuleStatus, ContentType, ClassInvitationCode } from './types';
 
 export const SEED_USERS: Array<User & { password: string }> = [
   {
     id: 'usr-admin-01',
-    name: 'Administrator Utama',
-    email: 'admin@sekolahmodel.sch.id',
+    name: 'Administrator PKBM Bina Insani',
+    email: 'admin@binainsani.sch.id',
     password: 'Admin123!',
     role: 'ADMIN',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
@@ -14,7 +14,7 @@ export const SEED_USERS: Array<User & { password: string }> = [
   {
     id: 'usr-teacher-01',
     name: 'Budi Santoso, S.Pd.',
-    email: 'guru.budi@sekolahmodel.sch.id',
+    email: 'guru.budi@binainsani.sch.id',
     password: 'Guru123!',
     role: 'TEACHER',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
@@ -28,7 +28,7 @@ export const SEED_USERS: Array<User & { password: string }> = [
   {
     id: 'usr-teacher-02',
     name: 'Siti Rahmawati, M.Pd.',
-    email: 'guru.siti@sekolahmodel.sch.id',
+    email: 'guru.siti@binainsani.sch.id',
     password: 'Guru123!',
     role: 'TEACHER',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
@@ -42,7 +42,7 @@ export const SEED_USERS: Array<User & { password: string }> = [
   {
     id: 'usr-student-01',
     name: 'Ahmad Fauzi',
-    email: 'siswa.ahmad@sekolahmodel.sch.id',
+    email: 'siswa.ahmad@gmail.com',
     password: 'Siswa123!',
     role: 'STUDENT',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
@@ -52,12 +52,16 @@ export const SEED_USERS: Array<User & { password: string }> = [
       id: 'std-01',
       studentNumber: '24001',
       nisn: '0071234561',
+      googleId: 'goog-std-01',
+      authProvider: 'GOOGLE',
+      status: 'ACTIVE',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
     },
   },
   {
     id: 'usr-student-02',
     name: 'Dewi Lestari',
-    email: 'siswa.dewi@sekolahmodel.sch.id',
+    email: 'dewi.lestari@gmail.com',
     password: 'Siswa123!',
     role: 'STUDENT',
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
@@ -67,12 +71,16 @@ export const SEED_USERS: Array<User & { password: string }> = [
       id: 'std-02',
       studentNumber: '24002',
       nisn: '0071234562',
+      googleId: 'goog-std-02',
+      authProvider: 'GOOGLE',
+      status: 'ACTIVE',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
     },
   },
   {
     id: 'usr-student-03',
     name: 'Reza Pratama',
-    email: 'siswa.reza@sekolahmodel.sch.id',
+    email: 'reza.pratama@gmail.com',
     password: 'Siswa123!',
     role: 'STUDENT',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
@@ -82,12 +90,15 @@ export const SEED_USERS: Array<User & { password: string }> = [
       id: 'std-03',
       studentNumber: '24003',
       nisn: '0071234563',
+      googleId: 'goog-std-03',
+      authProvider: 'GOOGLE',
+      status: 'ACTIVE',
     },
   },
   {
     id: 'usr-student-04',
     name: 'Anisa Nurul',
-    email: 'siswa.anisa@sekolahmodel.sch.id',
+    email: 'anisa.nurul@gmail.com',
     password: 'Siswa123!',
     role: 'STUDENT',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
@@ -97,35 +108,53 @@ export const SEED_USERS: Array<User & { password: string }> = [
       id: 'std-04',
       studentNumber: '24004',
       nisn: '0071234564',
+      googleId: 'goog-std-04',
+      authProvider: 'GOOGLE',
+      status: 'ACTIVE',
     },
   },
   {
-    id: 'usr-student-05',
-    name: 'Fajar Hidayat',
-    email: 'siswa.fajar@sekolahmodel.sch.id',
-    password: 'Siswa123!',
+    id: 'usr-student-new',
+    name: 'Rian Firmansyah (Siswa Baru)',
+    email: 'rian.baru@gmail.com',
+    password: '',
     role: 'STUDENT',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
     isActive: true,
-    createdAt: '2024-02-05T10:00:00.000Z',
+    createdAt: '2026-07-15T10:00:00.000Z',
     student: {
-      id: 'std-05',
-      studentNumber: '24005',
-      nisn: '0071234565',
+      id: 'std-new-01',
+      studentNumber: null,
+      nisn: null,
+      googleId: 'goog-std-new-01',
+      authProvider: 'GOOGLE',
+      status: 'PENDING',
+      profilePhotoUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
     },
   },
 ];
 
-export const TOKEN_STORAGE_KEY = 'sekolah_model_auth_token';
+export const TOKEN_STORAGE_KEY = 'bisa_edu_auth_token';
 
 let memoryUsers = [...SEED_USERS];
 
 export const mockBackend = {
   async login(email: string, pass: string): Promise<{ token: string; user: User }> {
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 350));
+
+    const cleanEmail = email.toLowerCase().trim();
+    // Support legacy emails for seamless backwards compatibility
+    const normalizedEmail =
+      cleanEmail === 'admin@sekolahmodel.sch.id'
+        ? 'admin@binainsani.sch.id'
+        : cleanEmail === 'guru.budi@sekolahmodel.sch.id'
+        ? 'guru.budi@binainsani.sch.id'
+        : cleanEmail === 'siswa.ahmad@sekolahmodel.sch.id'
+        ? 'siswa.ahmad@gmail.com'
+        : cleanEmail;
 
     const target = memoryUsers.find(
-      (u) => u.email.toLowerCase().trim() === email.toLowerCase().trim()
+      (u) => u.email.toLowerCase().trim() === normalizedEmail
     );
 
     if (!target || target.password !== pass) {
@@ -133,12 +162,91 @@ export const mockBackend = {
     }
 
     if (!target.isActive) {
-      throw new Error('Akun Anda dinonaktifkan. Silakan hubungi Administrator.');
+      throw new Error('Akun Anda dinonaktifkan. Silakan hubungi Administrator PKBM Bina Insani.');
     }
 
     const token = `jwt_header.${btoa(JSON.stringify({ userId: target.id, role: target.role, exp: Date.now() + 7 * 86400000 }))}.sig`;
     const { password, ...safeUser } = target;
     return { token, user: safeUser };
+  },
+
+  /**
+   * Google Sign-In khusus Siswa (Tahap 4.5)
+   */
+  async loginWithGoogle(
+    email: string,
+    name?: string,
+    idToken?: string
+  ): Promise<{ token: string; user: User; requiresClassCode: boolean; message: string }> {
+    await new Promise((r) => setTimeout(r, 450));
+    const cleanEmail = email.toLowerCase().trim();
+
+    let target = memoryUsers.find((u) => u.email.toLowerCase().trim() === cleanEmail);
+
+    if (!target) {
+      // Buat akun Siswa baru dengan autentikasi Google
+      const newStudentId = `std-${Date.now()}`;
+      const newUserId = `usr-student-${Date.now()}`;
+      const studentName = name || cleanEmail.split('@')[0].replace('.', ' ').toUpperCase();
+      const photo = `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150`;
+
+      const newUser: User & { password: string } = {
+        id: newUserId,
+        name: studentName,
+        email: cleanEmail,
+        password: '',
+        role: 'STUDENT',
+        avatar: photo,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        student: {
+          id: newStudentId,
+          studentNumber: null,
+          nisn: null,
+          googleId: `goog-${Date.now()}`,
+          authProvider: 'GOOGLE',
+          status: 'PENDING',
+          profilePhotoUrl: photo,
+        },
+      };
+      memoryUsers.push(newUser);
+      target = newUser;
+    } else {
+      if (target.role !== 'STUDENT') {
+        throw new Error(
+          'Akun ini terdaftar sebagai staf internal / guru. Silakan login menggunakan formulir masuk staf.'
+        );
+      }
+      if (target.student) {
+        target.student.authProvider = 'GOOGLE';
+        if (!target.student.status) {
+          target.student.status = 'ACTIVE';
+        }
+      }
+    }
+
+    if (!target.isActive) {
+      throw new Error('Akun Anda dinonaktifkan oleh administrator PKBM Bina Insani.');
+    }
+
+    // Periksa apakah siswa sudah terdaftar di kelas
+    const isEnrolled = target.student
+      ? memoryClassStudents.some((cs) => cs.studentId === target.student!.id)
+      : false;
+
+    const requiresClassCode = target.student?.status === 'PENDING' || !isEnrolled;
+
+    const token = `jwt_header.${btoa(JSON.stringify({ userId: target.id, role: target.role, exp: Date.now() + 7 * 86400000 }))}.sig`;
+    const { password, ...safeUser } = target;
+
+    return {
+      token,
+      user: safeUser,
+      requiresClassCode,
+      message: requiresClassCode
+        ? 'Pendaftaran akun Google berhasil! Silakan masukkan Kode Kelas BISA untuk memulai belajar.'
+        : 'Login Google berhasil! Selamat datang di BISA.',
+    };
   },
 
   async getMe(token: string): Promise<User> {
@@ -731,6 +839,171 @@ export const mockBackend = {
       subjects: assignments,
     };
   },
+
+  /**
+   * Siswa: Bergabung ke kelas menggunakan Kode Kelas BISA (Tahap 4.5)
+   */
+  async joinClassWithCode(
+    userId: string,
+    rawCode: string
+  ): Promise<{ success: boolean; message: string; class: any; studentStatus: string }> {
+    await new Promise((r) => setTimeout(r, 450));
+    const code = rawCode.trim().toUpperCase();
+
+    if (!code) {
+      throw new Error('Kode kelas wajib dimasukkan.');
+    }
+
+    const user = memoryUsers.find((u) => u.id === userId);
+    if (!user || !user.student) {
+      throw new Error('Profil siswa tidak ditemukan.');
+    }
+
+    const targetCode = memoryInvitationCodes.find(
+      (c) => c.code.toUpperCase() === code
+    );
+
+    if (!targetCode) {
+      throw new Error('Kode kelas tidak valid atau tidak ditemukan. Mohon periksa kembali.');
+    }
+
+    if (!targetCode.isActive) {
+      throw new Error('Kode kelas ini telah dinonaktifkan oleh administrator PKBM Bina Insani.');
+    }
+
+    if (targetCode.expiresAt && new Date() > new Date(targetCode.expiresAt)) {
+      throw new Error('Masa berlaku kode kelas ini telah berakhir.');
+    }
+
+    if (targetCode.maxUses !== null && targetCode.usedCount >= targetCode.maxUses) {
+      throw new Error('Kuota pendaftaran untuk kode kelas ini telah penuh.');
+    }
+
+    const targetClass = memoryClasses.find((c) => c.id === targetCode.classId);
+    if (!targetClass) {
+      throw new Error('Kelas tujuan tidak ditemukan.');
+    }
+
+    // Validasi siswa tidak boleh terdaftar di 2 kelas dalam Tahun Ajaran yang sama
+    const existingInYear = memoryClassStudents.find((cs) => {
+      const cls = memoryClasses.find((c) => c.id === cs.classId);
+      return cls?.academicYearId === targetCode.academicYearId && cs.studentId === user.student!.id;
+    });
+
+    if (existingInYear) {
+      if (existingInYear.classId === targetCode.classId) {
+        throw new Error(`Anda sudah terdaftar di kelas ${targetClass.name}.`);
+      }
+      throw new Error(
+        `Anda sudah terdaftar di kelas lain pada Tahun Ajaran ini. Satu siswa hanya dapat terdaftar di 1 kelas per tahun ajaran.`
+      );
+    }
+
+    // Masukkan siswa ke kelas
+    memoryClassStudents.push({
+      id: `cs-${Date.now()}`,
+      classId: targetCode.classId,
+      studentId: user.student.id,
+    });
+
+    // Tambah jumlah pemakaian kode
+    targetCode.usedCount += 1;
+
+    // Ubah status siswa menjadi ACTIVE
+    user.student.status = 'ACTIVE';
+
+    return {
+      success: true,
+      message: `Selamat! Anda berhasil bergabung ke kelas ${targetClass.name}.`,
+      class: targetClass,
+      studentStatus: 'ACTIVE',
+    };
+  },
+
+  /**
+   * Mengambil semua kode undangan kelas (Admin)
+   */
+  async getAllInvitationCodes(): Promise<ClassInvitationCode[]> {
+    await new Promise((r) => setTimeout(r, 200));
+    return memoryInvitationCodes.map((code) => {
+      const c = memoryClasses.find((cls) => cls.id === code.classId);
+      return {
+        ...code,
+        className: c?.name || code.className || 'Kelas BISA',
+      };
+    });
+  },
+
+  /**
+   * Mengambil kode kelas untuk kelas tertentu
+   */
+  async getClassInvitationCodes(classId: string): Promise<ClassInvitationCode[]> {
+    await new Promise((r) => setTimeout(r, 200));
+    return memoryInvitationCodes
+      .filter((c) => c.classId === classId)
+      .map((code) => {
+        const c = memoryClasses.find((cls) => cls.id === code.classId);
+        return {
+          ...code,
+          className: c?.name || code.className || 'Kelas BISA',
+        };
+      });
+  },
+
+  /**
+   * Admin: Generate kode kelas baru
+   */
+  async generateClassInvitationCode(
+    classId: string,
+    maxUses?: number | null,
+    expiresAt?: string | null
+  ): Promise<ClassInvitationCode> {
+    await new Promise((r) => setTimeout(r, 300));
+    const targetClass = memoryClasses.find((c) => c.id === classId);
+    if (!targetClass) throw new Error('Kelas tidak ditemukan');
+
+    const prefix = targetClass.name.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6) || 'KLS';
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const newCode: ClassInvitationCode = {
+      id: `code-${Date.now()}`,
+      code: `BISA-${prefix}-${rand}`,
+      classId,
+      className: targetClass.name,
+      academicYearId: targetClass.academicYearId,
+      isActive: true,
+      maxUses: maxUses ?? null,
+      usedCount: 0,
+      expiresAt: expiresAt ?? null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    memoryInvitationCodes.unshift(newCode);
+    return newCode;
+  },
+
+  /**
+   * Admin: Menonaktifkan kode kelas
+   */
+  async deactivateClassInvitationCode(codeId: string): Promise<ClassInvitationCode> {
+    await new Promise((r) => setTimeout(r, 200));
+    const target = memoryInvitationCodes.find((c) => c.id === codeId);
+    if (!target) throw new Error('Kode kelas tidak ditemukan');
+    target.isActive = false;
+    return target;
+  },
+
+  /**
+   * Admin: Regenerate kode kelas baru
+   */
+  async regenerateClassInvitationCode(classId: string, oldCodeId: string): Promise<ClassInvitationCode> {
+    await new Promise((r) => setTimeout(r, 300));
+    const oldCode = memoryInvitationCodes.find((c) => c.id === oldCodeId);
+    if (oldCode) {
+      oldCode.isActive = false;
+    }
+    return await this.generateClassInvitationCode(classId, oldCode?.maxUses, oldCode?.expiresAt);
+  },
 };
 
 // Initial academic state in memory
@@ -825,7 +1098,48 @@ let memoryClassStudents: Array<{
   { id: 'cs-02', classId: 'cls-01', studentId: 'std-02' },
   { id: 'cs-03', classId: 'cls-01', studentId: 'std-03' },
   { id: 'cs-04', classId: 'cls-02', studentId: 'std-04' },
-  { id: 'cs-05', classId: 'cls-02', studentId: 'std-05' },
+];
+
+let memoryInvitationCodes: ClassInvitationCode[] = [
+  {
+    id: 'code-01',
+    code: 'BISA-10MIPA1-K9X2',
+    classId: 'cls-01',
+    className: 'X-MIPA-1',
+    academicYearId: 'ay-01',
+    isActive: true,
+    maxUses: 35,
+    usedCount: 3,
+    expiresAt: null,
+    createdAt: '2026-07-01T08:00:00.000Z',
+    updatedAt: '2026-07-01T08:00:00.000Z',
+  },
+  {
+    id: 'code-02',
+    code: 'BISA-10MIPA2-M8Y7',
+    classId: 'cls-02',
+    className: 'X-MIPA-2',
+    academicYearId: 'ay-01',
+    isActive: true,
+    maxUses: 35,
+    usedCount: 1,
+    expiresAt: null,
+    createdAt: '2026-07-01T08:00:00.000Z',
+    updatedAt: '2026-07-01T08:00:00.000Z',
+  },
+  {
+    id: 'code-03',
+    code: 'BISA-PAKETB-7A99',
+    classId: 'cls-01',
+    className: 'X-MIPA-1',
+    academicYearId: 'ay-01',
+    isActive: true,
+    maxUses: null,
+    usedCount: 0,
+    expiresAt: null,
+    createdAt: '2026-07-10T09:00:00.000Z',
+    updatedAt: '2026-07-10T09:00:00.000Z',
+  },
 ];
 
 let memoryTeachingAssignments: Array<{

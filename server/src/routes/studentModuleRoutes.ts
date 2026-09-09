@@ -1,8 +1,25 @@
 import { Router } from 'express';
 import { StudentModuleController } from '../controllers/studentModuleController';
+import {
+  InvitationCodeController,
+  joinClassSchema,
+} from '../controllers/invitationCodeController';
 import { authenticate, authorize } from '../middleware/authMiddleware';
+import { validateRequest } from '../middleware/validateRequest';
 
 const router = Router();
+
+// Siswa: Profil lengkap siswa BISA (GET /api/student/me)
+router.get('/me', authenticate, authorize('STUDENT'), StudentModuleController.getProfile);
+
+// Siswa: Bergabung ke kelas menggunakan kode kelas (POST /api/student/join-class)
+router.post(
+  '/join-class',
+  authenticate,
+  authorize('STUDENT'),
+  validateRequest(joinClassSchema),
+  InvitationCodeController.joinClass
+);
 
 // Siswa: Mengambil daftar modul kelas yang PUBLISHED (GET /api/student/modules)
 router.get('/modules', authenticate, authorize('STUDENT'), StudentModuleController.getModules);
@@ -20,3 +37,4 @@ router.post('/module-progress/:contentId/complete', authenticate, authorize('STU
 router.delete('/module-progress/:contentId', authenticate, authorize('STUDENT'), StudentModuleController.uncompleteContent);
 
 export default router;
+

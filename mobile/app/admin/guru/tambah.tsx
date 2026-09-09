@@ -128,7 +128,7 @@ export default function TambahGuruScreen() {
 
             <Input
               label="Alamat Email *"
-              placeholder="Contoh: guru.budi@sekolahmodel.sch.id"
+              placeholder="Contoh: guru.budi@pkbmbinainsani.sch.id"
               leftIcon="mail-outline"
               keyboardType="email-address"
               autoCapitalize="none"

@@ -1,300 +1,168 @@
-# SEKOLAH MODEL - Learning Management System (LMS) Mobile
+# BISA (Bisa Insani Smart Academy) — PKBM Bina Insani
 
-> **Tahap 1**: Fondasi Aplikasi Mobile, Backend REST API, Database PostgreSQL Prisma, Autentikasi JWT, Multi-Role Authorization, Protected Routing, dan Role-Based Dashboard.
-
----
-
-## 1. Deskripsi Aplikasi
-
-**SEKOLAH MODEL** adalah aplikasi mobile Learning Management System (LMS) modern lintas platform (Android & iOS) yang dirancang untuk mendukung proses pembelajaran digital di lingkungan sekolah secara aman, terintegrasi, dan mudah digunakan.
-
-Aplikasi melayani 3 (tiga) peran pengguna utama melalui satu aplikasi terpadu:
-1. **ADMINISTRATOR**: Mengelola data sekolah, hak akses pengguna, serta memantau status operasional sistem.
-2. **GURU (TEACHER)**: Mengelola jadwal kelas pengajaran, bahan ajar, dan memfasilitasi aktivitas belajar mengajar.
-3. **SISWA (STUDENT)**: Mengakses modul digital, materi pelajaran, dan memantau tugas harian.
+> **Platform Pembelajaran Digital PKBM Bina Insani**  
+> Motto: **Hebat • Mandiri • Kreatif**  
+> Strategi Implementasi: **Android-First Mobile Application** (React Native & Expo SDK 52 + Express Backend + Prisma ORM)
 
 ---
 
-## 2. Teknologi
+## 1. Identitas Resmi Aplikasi
 
-### Mobile Frontend
+- **Nama Singkat**: BISA
+- **Nama Lengkap**: Bisa Insani Smart Academy
+- **Lembaga**: PKBM Bina Insani
+- **Deskripsi**: Platform Pembelajaran Digital PKBM Bina Insani
+- **Tagline**: *"Belajar, Berkembang, dan Berkarya Bersama."*
+- **Motto**: **Hebat • Mandiri • Kreatif**
+- **Fokus Platform**: **Android Mobile Application** (Laptop/Desktop untuk Development, Backend, Database, Android Emulator, dan Demo).
+
+Aplikasi melayani 3 (tiga) peran pengguna:
+1. **ADMINISTRATOR**: Kelola sistem, data akademik, tahun ajaran, kelas, dan aktivitas pembelajaran. Login via Email & Password internal.
+2. **GURU (TEACHER)**: Kelola kelas pengajaran, modul belajar, materi digital, dan tugas siswa. Login via Email & Password internal.
+3. **SISWA (STUDENT)**: Belajar materi digital, pantau progres modul, dan selesaikan tugas. **Login eksklusif menggunakan Google Sign-In** dan aktivasi akun via **Sistem Kode Kelas (Class Invitation Code)**.
+
+---
+
+## 2. Arsitektur & Teknologi
+
+### Mobile Application (Android Native First)
 - **Framework**: React Native with [Expo SDK 52](https://expo.dev)
 - **Routing & Navigasi**: Expo Router v4 (File-based routing & role-based bottom tabs)
-- **Language**: TypeScript (Strict type safety)
+- **Autentikasi Siswa**: Google Sign-In Android-compatible ID Token verification
+- **Sistem Aktivasi Siswa**: Class Invitation Code (`PENDING` -> `ACTIVE`)
 - **Secure Token Storage**: `expo-secure-store`
-- **Networking**: Axios (dengan Interceptor JWT Bearer & standard error handling)
-- **Icons & UI**: `@expo/vector-icons` (Ionicons), `react-native-safe-area-context`
+- **Networking**: Axios dengan interceptor JWT Bearer & standard error handling
+- **Desain & Theme**: Palet warna resmi BISA (Navy `#1E3A8A`, Cyan `#0284C7`, Emerald `#059669`, Gold `#D97706`), typography proporsional, mikro animasi elegan
 
 ### Backend REST API
 - **Runtime**: Node.js (v18+)
 - **Framework**: Express.js with TypeScript
-- **Database & ORM**: PostgreSQL & Prisma ORM v6
-- **Autentikasi & Keamanan**:
-  - JSON Web Tokens (`jsonwebtoken`)
-  - Password Hashing (`bcrypt`)
-  - HTTP Header Security (`helmet`)
-  - Cross-Origin Resource Sharing (`cors`)
-  - Rate Limiter (`express-rate-limit` pada endpoint login)
-  - Input Validation (`zod`)
+- **Database & ORM**: PostgreSQL & Prisma ORM
+- **Google Auth Service**: Google OAuth2 Client token verification (`google-auth-library`)
+- **Class Invitation Service**: Kode kelas unik 8-16 karakter, pelacakan kuota (`maxUses`, `usedCount`), masa berlaku (`expiresAt`), dan status aktivasi
+- **Keamanan**: JWT, `bcrypt` password hashing, `helmet`, `cors`, Zod schema validation
 
 ---
 
-## 3. Struktur Project
+## 3. Alur Autentikasi & Registrasi Siswa BISA
 
 ```
-sekolah-model/
-│
-├── mobile/                               # Aplikasi React Native Expo (Android & iOS)
-│   ├── app/                              # File-based routing (Expo Router)
-│   │   ├── _layout.tsx                   # Root Stack layout & AuthProvider
-│   │   ├── index.tsx                     # Splash Screen & Session check
-│   │   ├── login.tsx                     # Login Screen dengan KeyboardAvoidingView
-│   │   ├── admin/                        # Area Administrator
-│   │   │   ├── _layout.tsx               # Admin Bottom Tab Navigation
-│   │   │   ├── dashboard.tsx             # Dashboard Admin (Stats & System)
-│   │   │   ├── users.tsx                 # Pengelolaan Guru & Siswa
-│   │   │   └── profile.tsx               # Profil Admin
-│   │   ├── guru/                         # Area Guru (Teacher)
-│   │   │   ├── _layout.tsx               # Teacher Bottom Tab Navigation
-│   │   │   ├── dashboard.tsx             # Dashboard Guru (NIP & Menu)
-│   │   │   ├── kelas.tsx                 # Jadwal Kelas yang Diampu
-│   │   │   ├── modul.tsx                 # Bahan Ajar & Modul
-│   │   │   └── profile.tsx               # Profil Guru
-│   │   └── siswa/                        # Area Siswa (Student)
-│   │       ├── _layout.tsx               # Student Bottom Tab Navigation
-│   │       ├── dashboard.tsx             # Dashboard Siswa (NIS/NISN & Menu)
-│   │       ├── modul.tsx                 # Modul Belajar
-│   │       ├── tugas.tsx                 # Daftar Tugas & Ujian
-│   │       └── profile.tsx               # Profil Siswa
-│   ├── components/                       # Komponen Reusable (Button, Input, Card, dll.)
-│   ├── constants/                        # Konstanta warna, tema, dan config
-│   ├── context/                          # AuthContext (State user, token, session)
-│   ├── hooks/                            # Custom hooks (useAuth, useProtectedRoute)
-│   ├── services/                         # Axios instance & Auth API service
-│   ├── types/                            # TypeScript interfaces & types
-│   ├── utils/                            # SecureStore adapter & formatters
-│   ├── app.json                          # Konfigurasi Expo project
-│   └── package.json                      # Dependency aplikasi mobile
-│
-├── server/                               # Backend REST API
-│   ├── prisma/
-│   │   ├── schema.prisma                 # Skema relational PostgreSQL
-│   │   └── seed.ts                       # Seeding 1 Admin, 2 Guru, 5 Siswa
-│   ├── src/
-│   │   ├── controllers/                  # Controller login & getMe
-│   │   ├── middleware/                   # Authenticate, authorize, errorHandler, validation
-│   │   ├── routes/                       # Express router (/api/health, /api/auth, dll.)
-│   │   ├── services/                     # Business logic auth & database query
-│   │   ├── types/                        # DTO & types
-│   │   ├── utils/                        # Prisma client, JWT signer, bcrypt
-│   │   └── server.ts                     # Entry point Express
-│   ├── .env.example                      # Template variabel lingkungan
-│   ├── package.json                      # Dependency backend
-│   └── tsconfig.json                     # Konfigurasi TypeScript backend
-│
-├── README.md                             # Dokumentasi lengkap
-└── .gitignore                            # Berkas yang diabaikan Git
+┌────────────────────────────────────────────────────────┐
+│                   SISWA BISA                           │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                 [Lanjutkan dengan Google]
+                           │
+             ┌─────────────▼─────────────┐
+             │ POST /api/auth/student/google
+             │     with Google idToken   │
+             └─────────────┬─────────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        ▼                                     ▼
+[Akun Baru / PENDING]               [Akun Lama / ACTIVE]
+requiresClassCode: true             requiresClassCode: false
+        │                                     │
+        ▼                                     ▼
+Layar Lengkapi Pendaftaran            Dashboard Siswa BISA
+- Tampil Foto Google Siswa            - Ringkasan Progres
+- Input Kode Kelas                    - Continue Learning Modul
+        │                             - Akses Materi Digital
+        ▼
+POST /api/student/join-class
+  with { code: "BISA-..." }
+        │
+Status Siswa -> ACTIVE
+Terhubung ke Kelas & Rombel
+        │
+        ▼
+Dashboard Siswa BISA
 ```
 
 ---
 
-## 4. Persyaratan Sistem
+## 4. Akun Pengguna Development & Testing
 
-Pastikan perangkat pengembangan Anda telah terinstal:
-- **Node.js**: Versi 18.x atau 20.x LTS
-- **npm** (v9+) atau **yarn**
-- **PostgreSQL**: Versi 14, 15, atau 16
-- **Expo CLI**: `npx expo`
-- **Aplikasi Expo Go** (pada ponsel fisik Android / iOS) atau Simulator/Emulator:
-  - **Android Studio** (Android Emulator dengan SDK 34+)
-  - **Xcode** (iOS Simulator macOS)
+Berikut adalah daftar akun yang tersedia setelah menjalankan seed database:
 
----
-
-## 5. Cara Install Backend
-
-Masuk ke direktori `server`:
-```bash
-cd server
-npm install
-```
-
----
-
-## 6. Setup PostgreSQL
-
-1. Buat database baru bernama `sekolah_model` di server PostgreSQL lokal atau cloud Anda:
-```sql
-CREATE DATABASE sekolah_model;
-```
-
-2. Buat file `.env` di dalam folder `server/` dengan menyalin template `.env.example`:
-```bash
-cp .env.example .env
-```
-
-3. Sesuaikan connection string `DATABASE_URL` di dalam `server/.env`:
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/sekolah_model?schema=public"
-JWT_SECRET="sekolah-model-super-secret-jwt-key-2025"
-JWT_EXPIRES_IN="7d"
-PORT=5000
-NODE_ENV="development"
-```
-
----
-
-## 7. Prisma Migration & Generate
-
-Jalankan perintah berikut di dalam direktori `server/`:
-
-```bash
-# 1. Generate Prisma Client
-npm run prisma:generate
-
-# 2. Terapkan migration database ke PostgreSQL
-npm run prisma:migrate
-```
-
-Perintah di atas akan membuat tabel `users`, `teachers`, dan `students` beserta relasi 1-ke-1 dan foreign key yang valid.
-
----
-
-## 8. Seed Database Development
-
-Jalankan seeding development untuk mengisi data awal:
-
-```bash
-npm run prisma:seed
-```
-
-### Akun Development yang Dibuat:
-
-| Peran | Email | Kata Sandi | Identitas Tambahan |
+| Peran | Alamat Email | Kata Sandi | Keterangan / Status |
 | :--- | :--- | :--- | :--- |
-| **ADMIN** | `admin@sekolahmodel.sch.id` | `Admin123!` | Administrator Utama |
-| **TEACHER** | `guru.budi@sekolahmodel.sch.id` | `Guru123!` | NIP: 198501152010011001 |
-| **TEACHER** | `guru.siti@sekolahmodel.sch.id` | `Guru123!` | NIP: 198803202012022002 |
-| **STUDENT** | `siswa.ahmad@sekolahmodel.sch.id` | `Siswa123!` | NIS: 24001, NISN: 0071234561 |
-| **STUDENT** | `siswa.dewi@sekolahmodel.sch.id` | `Siswa123!` | NIS: 24002, NISN: 0071234562 |
-| **STUDENT** | `siswa.reza@sekolahmodel.sch.id` | `Siswa123!` | NIS: 24003, NISN: 0071234563 |
-| **STUDENT** | `siswa.anisa@sekolahmodel.sch.id` | `Siswa123!` | NIS: 24004, NISN: 0071234564 |
-| **STUDENT** | `siswa.fajar@sekolahmodel.sch.id` | `Siswa123!` | NIS: 24005, NISN: 0071234565 |
+| **ADMINISTRATOR** | `admin@pkbmbinainsani.sch.id` | `Admin123!` | Administrator Utama Sistem |
+| **GURU** | `guru.budi@pkbmbinainsani.sch.id` | `Guru123!` | Wali Kelas & Pengajar (NIP: 198501152010011001) |
+| **GURU** | `guru.siti@pkbmbinainsani.sch.id` | `Guru123!` | Pengajar (NIP: 198803202012022002) |
+| **SISWA (Aktif)** | `siswa.ahmad@pkbmbinainsani.sch.id` | Google Sign-In | Status: `ACTIVE` (Kelas X-A) |
+| **SISWA (Aktif)** | `siswa.dewi@pkbmbinainsani.sch.id` | Google Sign-In | Status: `ACTIVE` (Kelas XI-B) |
+| **SISWA (Baru)** | `rizky.siswa.baru@gmail.com` | Google Sign-In | Status: `PENDING` (Uji Coba Kode Undangan) |
 
-> **Catatan Keamanan**: Seluruh kata sandi di-hash menggunakan algoritma `bcrypt` dengan salt 10 rounds. Password hash tidak pernah dikembalikan dalam response API apapun.
+*(Catatan: Sistem login Administrator dan Guru juga mendukung alias domain lama `sekolahmodel.sch.id` secara mulus tanpa mengganggu data yang sudah berjalan).*
 
 ---
 
-## 9. Menjalankan Backend Server
+## 5. Menjalankan Project secara Lokal
 
-```bash
-npm run dev
-```
-Backend akan aktif di `http://localhost:5000`.
-- Health Check: `GET http://localhost:5000/api/health`
-- Login: `POST http://localhost:5000/api/auth/login`
-- Profil: `GET http://localhost:5000/api/auth/me`
-
----
-
-## 10. Cara Install Mobile
-
-Buka terminal baru dan masuk ke direktori `mobile`:
-```bash
-cd mobile
-npm install
-```
-
----
-
-## 11. Konfigurasi Environment Mobile
-
-Buat file `.env` di dalam folder `mobile/`:
-```env
-EXPO_PUBLIC_API_URL=http://localhost:5000/api
-```
-
-> **Perhatian Khusus Emulator & Perangkat Fisik**:
-> - **Android Emulator**: Gunakan `http://10.0.2.2:5000/api` karena Android emulator memetakan host machine ke IP `10.0.2.2`.
-> - **iOS Simulator**: Dapat langsung menggunakan `http://localhost:5000/api`.
-> - **Perangkat Fisik (Expo Go via WiFi)**: Gunakan IP LAN komputer Anda, contoh: `http://192.168.1.100:5000/api`.
-
----
-
-## 12. Cara Menjalankan Expo
-
-Jalankan perintah:
-```bash
-npx expo start
-```
-
-Pilihan menjalankan:
-- **Scan QR Code**: Buka aplikasi **Expo Go** pada iPhone (gunakan Camera bawaan) atau Android (gunakan aplikasi Expo Go) lalu scan QR Code di terminal.
-- **Android Emulator**: Tekan huruf `a` di terminal (pastikan emulator aktif).
-- **iOS Simulator**: Tekan huruf `i` di terminal (pada macOS dengan Xcode).
-- **Web Browser**: Tekan huruf `w` di terminal.
-
----
-
-## 13. Cara Build Aplikasi Mobile (Production)
-
-Gunakan **EAS Build** (Expo Application Services) untuk menghasilkan file APK/AAB (Android) dan IPA (iOS):
-
-1. Install EAS CLI:
-```bash
-npm install -g eas-cli
-```
-
-2. Login ke akun Expo:
-```bash
-eas login
-```
-
-3. Konfigurasi project EAS:
-```bash
-eas build:configure
-```
-
-4. Jalankan build:
-- **Android APK (Testing)**:
-  ```bash
-  eas build --platform android --profile preview
-  ```
-- **Android AAB (Google Play Store)**:
-  ```bash
-  eas build --platform android --profile production
-  ```
-- **iOS (Apple App Store / TestFlight)**:
-  ```bash
-  eas build --platform ios --profile production
-  ```
-
----
-
-## 14. Cara Konfigurasi API Production
-
-Saat aplikasi mobile dan backend dideploy ke production:
-1. Pasang SSL/TLS (HTTPS) pada server backend Express (contoh: `https://api.sekolahmodel.sch.id/api`).
-2. Update variabel `EXPO_PUBLIC_API_URL` pada mobile build:
-   ```env
-   EXPO_PUBLIC_API_URL=https://api.sekolahmodel.sch.id/api
+### A. Persiapan Backend & Database
+1. Salin file environment:
+   ```bash
+   cd server
+   cp .env.example .env
    ```
-3. Atur CORS origin di `server/src/server.ts` agar menerima domain/request resmi aplikasi.
-4. Pastikan `JWT_SECRET` production menggunakan string acak berkekuatan tinggi minimal 64 karakter.
+2. Jalankan migrasi dan seeding data:
+   ```bash
+   npm run prisma:generate
+   npm run prisma:migrate
+   npm run prisma:seed
+   ```
+3. Jalankan backend server:
+   ```bash
+   npm run dev
+   ```
+   Backend aktif di `http://localhost:5000/api`.
+
+### B. Menjalankan Mobile App pada Android Emulator
+1. Konfigurasi URL API:
+   Pada Android Emulator, `localhost` komputer host diakses melalui IP `10.0.2.2`. Konfigurasi default di `mobile/constants/config.ts` sudah mendeteksi `Platform.OS === 'android'` secara otomatis.
+2. Jalankan Expo Development Server:
+   ```bash
+   cd mobile
+   npx expo start --android
+   ```
+3. Tekan `a` pada terminal Expo untuk langsung membuka aplikasi di Android Emulator.
 
 ---
 
-## 15. Validasi Tahap 1 Selesai
+## 6. Konfigurasi Google Sign-In Android
 
-- [x] Struktur aplikasi mobile React Native & Expo Router
-- [x] Backend Express REST API terpisah & modular
-- [x] Database PostgreSQL & Prisma ORM dengan relasi valid
-- [x] Autentikasi JWT & bcrypt hashing
-- [x] Penyimpanan token via `expo-secure-store`
-- [x] Restorasi sesi otomatis saat aplikasi dibuka
-- [x] Splash screen dengan logo dan branding Sekolah Model
-- [x] Login screen dengan KeyboardAvoidingView dan error handling
-- [x] Route protection di level frontend & middleware authorize di backend
-- [x] Tiga dashboard role khusus (Admin, Guru, Siswa) tanpa blank screen
-- [x] Seeding data development lengkap (1 Admin, 2 Guru, 5 Siswa)
-- [x] Kompatibel penuh untuk Android dan iOS
+Untuk deployment production atau pengujian Google Sign-In mandiri di Android Studio:
+
+1. **Google Cloud Console**:
+   - Buat OAuth 2.0 Client ID jenis **Android**.
+   - Masukkan Package Name Android: `com.binainsani.bisaacademy`.
+   - Masukkan SHA-1 Fingerprint dari debug/release keystore:
+     ```bash
+     cd android && ./gradlew signingReport
+     ```
+   - Buat OAuth 2.0 Client ID jenis **Web Application** untuk backend verification (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` dan `GOOGLE_CLIENT_ID`).
+
+2. **File Environment**:
+   - Backend (`server/.env`):
+     ```env
+     GOOGLE_CLIENT_ID=your-google-web-client-id.apps.googleusercontent.com
+     ```
+   - Mobile (`mobile/.env`):
+     ```env
+     EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your-google-web-client-id.apps.googleusercontent.com
+     EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=your-google-android-client-id.apps.googleusercontent.com
+     ```
+
+---
+
+## 7. Validasi Tahap 4.5 Selesai
+
+- [x] **Branding Resmi BISA**: Logo, nama BISA, Bisa Insani Smart Academy, PKBM Bina Insani, dan motto Hebat • Mandiri • Kreatif.
+- [x] **Splash & Welcome Screen**: Transisi berurutan logo -> BISA -> nama lembaga -> motto.
+- [x] **Login Multi-Role**: Card interaktif Administrator, Guru, dan Siswa.
+- [x] **Siswa Google Sign-In**: Akses tanpa password internal, verifikasi token di backend.
+- [x] **Sistem Kode Kelas (Class Invitation Code)**: Manajemen kode oleh Admin, aktivasi instan dari status `PENDING` ke `ACTIVE`.
+- [x] **Layar Lengkapi Pendaftaran**: Input kode kelas terintegrasi data profil Google siswa.
+- [x] **Dashboard Siswa Interaktif**: Motivasi, ringkasan progres, dan modul Continue Learning.
+- [x] **Pembersihan Branding Lama**: Pembaruan referensi sekolahmodel ke pkbmbinainsani dengan backwards-compatibility yang aman.

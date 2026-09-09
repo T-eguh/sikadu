@@ -157,7 +157,7 @@ export default function EditSiswaScreen() {
 
               <Input
                 label="Alamat Email *"
-                placeholder="Contoh: siswa.rizky@sekolahmodel.sch.id"
+                placeholder="Contoh: siswa.rizky@pkbmbinainsani.sch.id"
                 leftIcon="mail-outline"
                 keyboardType="email-address"
                 autoCapitalize="none"

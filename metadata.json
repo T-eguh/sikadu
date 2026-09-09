@@ -1,6 +1,6 @@
 {
-  "name": "Sekolah Model",
-  "description": "Aplikasi Mobile LMS (Learning Management System) Sekolah Model untuk Android dan iOS berbasis React Native Expo dan Node.js Express Prisma.",
+  "name": "BISA - Bisa Insani Smart Academy",
+  "description": "Platform Pembelajaran Digital PKBM Bina Insani untuk Android dan iOS berbasis React Native Expo dan Node.js Express Prisma. Hebat • Mandiri • Kreatif.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

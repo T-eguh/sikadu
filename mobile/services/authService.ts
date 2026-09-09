@@ -25,4 +25,33 @@ export const authService = {
     }
     return response.data.data;
   },
+
+  async loginWithGoogle(idToken: string): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>('/auth/student/google', {
+      idToken,
+    });
+    if (!response.data.data) {
+      throw new Error(response.data.message || 'Gagal masuk dengan akun Google');
+    }
+    return response.data.data;
+  },
+
+  async joinClass(code: string): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>('/student/join-class', {
+      code,
+      invitationCode: code,
+    });
+    if (!response.data.data) {
+      throw new Error(response.data.message || 'Gagal bergabung ke kelas');
+    }
+    return response.data.data;
+  },
+
+  async getStudentProfile(): Promise<any> {
+    const response = await apiClient.get<ApiResponse<any>>('/student/me');
+    if (!response.data.data) {
+      throw new Error(response.data.message || 'Profil siswa tidak ditemukan');
+    }
+    return response.data.data;
+  },
 };

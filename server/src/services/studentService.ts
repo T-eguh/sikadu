@@ -75,6 +75,10 @@ export class StudentService {
               id: true,
               studentNumber: true,
               nisn: true,
+              googleId: true,
+              authProvider: true,
+              status: true,
+              profilePhotoUrl: true,
               createdAt: true,
               updatedAt: true,
             },
@@ -116,8 +120,21 @@ export class StudentService {
             id: true,
             studentNumber: true,
             nisn: true,
+            googleId: true,
+            authProvider: true,
+            status: true,
+            profilePhotoUrl: true,
             createdAt: true,
             updatedAt: true,
+            classes: {
+              include: {
+                class: {
+                  include: {
+                    academicYear: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

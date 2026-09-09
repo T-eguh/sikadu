@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Sekolah Model",
-    "slug": "sekolah-model",
+    "name": "BISA",
+    "slug": "bisa-academy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "sekolahmodel",
+    "scheme": "bisaacademy",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "id.sch.sekolahmodel.app"
+      "bundleIdentifier": "id.co.pkbmbinainsani.bisaacademy"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1E3A8A"
       },
-      "package": "id.sch.sekolahmodel.app"
+      "package": "id.co.pkbmbinainsani.bisaacademy"
     },
     "web": {
       "favicon": "./assets/favicon.png",

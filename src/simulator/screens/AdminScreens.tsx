@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '../types';
+import { User, ClassInvitationCode } from '../types';
 import {
   ShieldCheck,
   Users,
@@ -16,6 +16,11 @@ import {
   AlertCircle,
   ArrowLeft,
   BookOpen,
+  KeyRound,
+  Copy,
+  Check,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { mockBackend } from '../mockApi';
 
@@ -63,7 +68,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
   const [students, setStudents] = useState<User[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
-  const [studentView, setStudentView] = useState<'list' | 'add' | 'detail' | 'edit' | 'reset-password'>('list');
+  const [studentView, setStudentView] = useState<'list' | 'add' | 'detail' | 'edit' | 'reset-password' | 'codes'>('list');
 
   // Student Form State
   const [sName, setSName] = useState('');
@@ -74,6 +79,14 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
   const [sNewPassword, setSNewPassword] = useState('');
   const [sMessage, setSMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Invitation Codes State (Tahap 4.5)
+  const [invitationCodes, setInvitationCodes] = useState<ClassInvitationCode[]>([]);
+  const [classList, setClassList] = useState<any[]>([]);
+  const [selectedClassForCode, setSelectedClassForCode] = useState<string>('');
+  const [newCodeMaxUses, setNewCodeMaxUses] = useState<number>(35);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [codeMessage, setCodeMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const loadData = async () => {
     const st = await mockBackend.getStats();
     setStats(st);
@@ -81,11 +94,61 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
     setTeachers(tList);
     const sList = await mockBackend.getStudents(studentSearch);
     setStudents(sList);
+    const codes = await mockBackend.getAllInvitationCodes();
+    setInvitationCodes(codes);
+    const classes = await mockBackend.getClasses();
+    setClassList(classes);
+    if (classes.length > 0 && !selectedClassForCode) {
+      setSelectedClassForCode(classes[0].id);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, [teacherSearch, studentSearch]);
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleGenerateCode = async () => {
+    if (!selectedClassForCode) return;
+    try {
+      setCodeMessage(null);
+      await mockBackend.generateClassInvitationCode(
+        selectedClassForCode,
+        newCodeMaxUses > 0 ? newCodeMaxUses : null
+      );
+      const updatedCodes = await mockBackend.getAllInvitationCodes();
+      setInvitationCodes(updatedCodes);
+      setCodeMessage({ type: 'success', text: 'Kode kelas baru berhasil dibuat!' });
+    } catch (err: any) {
+      setCodeMessage({ type: 'error', text: err.message || 'Gagal membuat kode kelas.' });
+    }
+  };
+
+  const handleDeactivateCode = async (codeId: string) => {
+    try {
+      await mockBackend.deactivateClassInvitationCode(codeId);
+      const updatedCodes = await mockBackend.getAllInvitationCodes();
+      setInvitationCodes(updatedCodes);
+    } catch (err: any) {
+      alert(err.message || 'Gagal menonaktifkan kode');
+    }
+  };
+
+  const handleRegenerateCode = async (classId: string, oldCodeId: string) => {
+    try {
+      await mockBackend.regenerateClassInvitationCode(classId, oldCodeId);
+      const updatedCodes = await mockBackend.getAllInvitationCodes();
+      setInvitationCodes(updatedCodes);
+      setCodeMessage({ type: 'success', text: 'Kode kelas berhasil diperbarui!' });
+    } catch (err: any) {
+      alert(err.message || 'Gagal regenerasi kode');
+    }
+  };
 
   // Guru Handlers
   const handleOpenAddTeacher = () => {
@@ -344,7 +407,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="Contoh: guru.budi@sekolahmodel.sch.id"
+                  placeholder="Contoh: guru.budi@pkbmbinainsani.sch.id"
                   value={tEmail}
                   onChange={(e) => setTEmail(e.target.value)}
                   className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-700"
@@ -752,7 +815,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="Contoh: siswa.rizky@sekolahmodel.sch.id"
+                  placeholder="Contoh: siswa.rizky@pkbmbinainsani.sch.id"
                   value={sEmail}
                   onChange={(e) => setSEmail(e.target.value)}
                   className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-600"
@@ -1073,25 +1136,231 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
       );
     }
 
+    // Subview: Kelola Kode Kelas (Class Invitation Codes - Tahap 4.5)
+    if (studentView === 'codes') {
+      return (
+        <div className="flex-1 w-full bg-slate-50 flex flex-col overflow-y-auto font-sans">
+          <div className="bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setStudentView('list');
+                  setCodeMessage(null);
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-200"
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <div>
+                <h2 className="text-sm font-bold text-slate-800">Kode Undangan Kelas BISA</h2>
+                <p className="text-[10px] text-slate-500">PKBM Bina Insani • Self-Enrollment Siswa</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-3.5">
+            {codeMessage && (
+              <div
+                className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                  codeMessage.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}
+              >
+                {codeMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                <span>{codeMessage.text}</span>
+              </div>
+            )}
+
+            {/* Form Buat Kode Kelas Baru */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <KeyRound size={16} />
+                </div>
+                <h3 className="text-xs font-bold text-slate-800">Buat Kode Undangan Baru</h3>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                  Pilih Kelas Tujuan
+                </label>
+                <select
+                  value={selectedClassForCode}
+                  onChange={(e) => setSelectedClassForCode(e.target.value)}
+                  className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 text-slate-800 font-medium"
+                >
+                  {classList.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.academicYear?.name || '2026/2027'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                  Batas Kuota Siswa (Opsional)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={newCodeMaxUses}
+                  onChange={(e) => setNewCodeMaxUses(parseInt(e.target.value) || 0)}
+                  className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 text-slate-800 font-medium"
+                  placeholder="35 siswa"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGenerateCode}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2"
+              >
+                <Plus size={15} />
+                <span>Generate Kode Kelas</span>
+              </button>
+            </div>
+
+            {/* Daftar Kode Kelas yang Ada */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold text-slate-800">Daftar Kode Aktif</h3>
+                <span className="text-[10px] text-slate-500 font-medium">
+                  {invitationCodes.length} Kode Terdaftar
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {invitationCodes.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`bg-white rounded-2xl p-3.5 border shadow-sm transition ${
+                      item.isActive ? 'border-slate-200' : 'border-slate-200 opacity-60 bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <div>
+                        <span className="text-xs font-bold text-slate-900 block">
+                          {item.class?.name || 'Kelas Belajar'}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          T.A. {item.class?.academicYear?.name || '2026/2027'}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          item.isActive
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        }`}
+                      >
+                        {item.isActive ? 'Aktif' : 'Nonaktif'}
+                      </span>
+                    </div>
+
+                    {/* Code Display & 1-Click Copy */}
+                    <div className="mt-2.5 flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                          Kode Masuk Siswa:
+                        </span>
+                        <span className="font-mono font-black text-sm text-blue-900 tracking-wider">
+                          {item.code}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCode(item.code)}
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
+                          copiedCode === item.code
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {copiedCode === item.code ? (
+                          <>
+                            <Check size={14} />
+                            <span>Tersalin!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={14} />
+                            <span>Salin</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                      <span>
+                        Penggunaan: <b>{item.usedCount}</b>
+                        {item.maxUses ? ` / ${item.maxUses} Siswa` : ' (Tanpa batas)'}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {item.isActive ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDeactivateCode(item.id)}
+                            className="text-[10px] font-bold text-red-600 hover:text-red-800"
+                          >
+                            Nonaktifkan
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateCode(item.classId, item.id)}
+                          className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <RefreshCw size={11} />
+                          <span>Perbarui</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Default Student List View
     return (
-      <div className="flex-1 w-full bg-slate-50 flex flex-col overflow-y-auto">
+      <div className="flex-1 w-full bg-slate-50 flex flex-col overflow-y-auto font-sans">
         <div className="bg-white px-4 py-3 border-b border-slate-200 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-slate-800">Manajemen Siswa</h2>
+            <h2 className="text-sm font-bold text-slate-800">Manajemen Siswa BISA</h2>
             <p className="text-[11px] text-slate-500">{students.length} Siswa Terdaftar</p>
           </div>
           <button
-            onClick={handleOpenAddStudent}
-            className="flex items-center gap-1 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition"
+            onClick={() => setStudentView('codes')}
+            className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm"
           >
-            <Plus size={14} />
-            <span>Tambah</span>
+            <KeyRound size={14} />
+            <span>Kode Kelas</span>
           </button>
         </div>
 
+        {/* Informative Banner on Google Sign-In & Class Code */}
+        <div className="mx-4 mt-3 bg-blue-50 border border-blue-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-blue-900 text-xs">
+          <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+            <KeyRound size={14} />
+          </div>
+          <div>
+            <span className="font-bold block text-blue-950">Pendaftaran Mandiri Siswa BISA</span>
+            <span className="text-[11px] text-blue-800 leading-snug">
+              Siswa mendaftar mandiri via Google Sign-In dan bergabung ke kelas menggunakan Kode Undangan Kelas.
+            </span>
+          </div>
+        </div>
+
         {/* Search */}
-        <div className="px-4 py-2 bg-white border-b border-slate-100 flex items-center gap-2">
+        <div className="px-4 py-2 mt-2 bg-white border-b border-slate-100 flex items-center gap-2">
           <Search size={16} className="text-slate-400" />
           <input
             type="text"
@@ -1107,20 +1376,53 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
             <div
               key={item.id}
               onClick={() => handleOpenDetailStudent(item)}
-              className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-emerald-300 transition"
+              className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-300 transition"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
-                  {item.name.charAt(0)}
+                <div className="relative">
+                  <img
+                    src={item.avatar || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100'}
+                    alt={item.name}
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  />
+                  {item.student?.authProvider === 'GOOGLE' && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-white shadow-xs border border-slate-200 flex items-center justify-center">
+                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.16 0 9.98 0 12s.45 3.84 1.24 5.42l4.04-3.15z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-800">{item.name}</h4>
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-slate-800">{item.name}</h4>
+                    {item.student?.status === 'PENDING' && (
+                      <span className="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.2 rounded border border-amber-200">
+                        Menunggu Kelas
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-slate-500">{item.email}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-semibold text-emerald-600">
+                    <span className="text-[10px] font-semibold text-blue-600">
                       NIS: {item.student?.studentNumber || '-'}
                     </span>
-                    <span className="text-[10px] font-semibold text-blue-600">
+                    <span className="text-[10px] font-semibold text-slate-500">
                       NISN: {item.student?.nisn || '-'}
                     </span>
                   </div>
@@ -1195,18 +1497,28 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
 
   // 4. DASHBOARD TAB
   return (
-    <div className="flex-1 w-full bg-slate-50 flex flex-col p-4 overflow-y-auto space-y-3.5">
-      {/* Welcome Banner Card */}
-      <div className="bg-[#1E3A8A] rounded-2xl p-4 text-white shadow-md shadow-blue-900/10 flex items-center gap-3.5">
-        <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-          <ShieldCheck size={26} className="text-white" />
+    <div className="flex-1 w-full bg-slate-50 flex flex-col p-4 overflow-y-auto space-y-3.5 font-sans">
+      {/* Welcome Banner Card with BISA Official Identity */}
+      <div className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2563EB] rounded-2xl p-4 text-white shadow-md shadow-blue-950/20 flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/10">
+            <ShieldCheck size={26} className="text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-sky-300 font-bold uppercase tracking-wider">
+                BISA • PKBM BINA INSANI
+              </span>
+            </div>
+            <h3 className="text-sm font-black leading-tight text-white">{user.name}</h3>
+            <p className="text-[10px] text-amber-300 font-bold mt-0.5 tracking-wider">
+              HEBAT • MANDIRI • KREATIF
+            </p>
+          </div>
         </div>
-        <div>
-          <span className="text-[11px] text-blue-200 font-medium">Selamat Datang,</span>
-          <h3 className="text-sm font-extrabold leading-tight">{user.name}</h3>
-          <p className="text-[11px] text-blue-100/90 mt-0.5">
-            Panel Pengendalian Utama Sekolah Model LMS
-          </p>
+
+        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center border border-white/10">
+          <Sparkles size={18} className="text-amber-300" />
         </div>
       </div>
 
@@ -1218,7 +1530,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
               Status Sistem
             </span>
-            <span className="text-xs font-bold text-slate-800">Aktif & Terhubung Database</span>
+            <span className="text-xs font-bold text-slate-800">Aktif & Terhubung Database BISA</span>
           </div>
         </div>
         <span className="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg border border-emerald-200">
@@ -1228,7 +1540,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
 
       {/* Core Statistics Cards (Dynamic from Database) */}
       <div>
-        <h4 className="text-xs font-bold text-slate-800 mb-2">Statistik Pengguna</h4>
+        <h4 className="text-xs font-bold text-slate-800 mb-2">Statistik Akademik BISA</h4>
         <div className="grid grid-cols-2 gap-2.5">
           {/* Total Guru Card */}
           <div
@@ -1247,7 +1559,10 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
 
           {/* Total Siswa Card */}
           <div
-            onClick={() => onNavigateTab('siswa')}
+            onClick={() => {
+              setStudentView('list');
+              onNavigateTab('siswa');
+            }}
             className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-center text-center cursor-pointer hover:border-emerald-300 transition"
           >
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
@@ -1264,8 +1579,35 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
 
       {/* Quick Navigations */}
       <div>
-        <h4 className="text-xs font-bold text-slate-800 mb-2">Manajemen Pengguna</h4>
+        <h4 className="text-xs font-bold text-slate-800 mb-2">Manajemen BISA</h4>
         <div className="space-y-2">
+          {/* Class Code Manager Shortcut */}
+          <div
+            onClick={() => {
+              setStudentView('codes');
+              onNavigateTab('siswa');
+            }}
+            className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-400 transition"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                <KeyRound size={16} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h5 className="text-xs font-bold text-blue-950">Kode Kelas (Undangan Siswa)</h5>
+                  <span className="text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-full">
+                    Tahap 4.5
+                  </span>
+                </div>
+                <p className="text-[10px] text-blue-700">
+                  Generate & kelola kode registrasi kelas mandiri untuk siswa
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-blue-400" />
+          </div>
+
           <div
             onClick={() => onNavigateTab('guru')}
             className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-300 transition"
@@ -1285,7 +1627,10 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
           </div>
 
           <div
-            onClick={() => onNavigateTab('siswa')}
+            onClick={() => {
+              setStudentView('list');
+              onNavigateTab('siswa');
+            }}
             className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-emerald-300 transition"
           >
             <div className="flex items-center gap-2.5">
@@ -1295,7 +1640,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               <div>
                 <h5 className="text-xs font-bold text-slate-800">Kelola Siswa</h5>
                 <p className="text-[10px] text-slate-500">
-                  Daftar peserta didik, NIS, NISN & reset password
+                  Daftar peserta didik, NIS, status Google & aktivasi
                 </p>
               </div>
             </div>
@@ -1313,7 +1658,7 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h5 className="text-xs font-bold text-purple-950">Review Modul Pembelajaran</h5>
-                  <span className="text-[9px] font-extrabold bg-amber-500 text-white px-1.5 py-0.2 rounded-full">
+                  <span className="text-[9px] font-extrabold bg-purple-600 text-white px-1.5 py-0.2 rounded-full">
                     Tahap 4
                   </span>
                 </div>
@@ -1327,12 +1672,15 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
         </div>
       </div>
 
-      {/* Phase 4 info banner */}
-      <div className="bg-slate-100 rounded-xl p-2.5 flex items-start gap-2 text-slate-600 text-[11px] leading-relaxed">
-        <ShieldCheck size={15} className="shrink-0 text-blue-600 mt-0.5" />
-        <span>
-          Tahap 4 aktif: Manajemen Modul & Materi Pembelajaran interaktif, penugasan mengajar terverifikasi, dan kalkulasi progres siswa otomatis.
-        </span>
+      {/* Phase 4.5 info banner */}
+      <div className="bg-blue-50 border border-blue-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-blue-900 text-[11px] leading-relaxed">
+        <ShieldCheck size={16} className="shrink-0 text-blue-700 mt-0.5" />
+        <div>
+          <span className="font-bold block text-blue-950">BISA - PKBM Bina Insani (Tahap 4.5 Aktif)</span>
+          <span className="text-blue-800">
+            Sistem autentikasi Google Sign-In untuk siswa, pembatasan pendaftaran mandiri via Kode Kelas berkuota, dan identitas resmi lembaga.
+          </span>
+        </div>
       </div>
 
       {showModuleReview && (

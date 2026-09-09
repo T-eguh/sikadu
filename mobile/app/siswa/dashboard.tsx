@@ -1,134 +1,337 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeScreen } from '../../components/SafeScreen';
-import { Header } from '../../components/Header';
-import { Card } from '../../components/Card';
+import { AppHeader, AppCard, AppButton, ProgressBar } from '../../components/UI';
 import { useAuth } from '../../hooks/useAuth';
 import { useProtectedRoute } from '../../hooks/useProtectedRoute';
-import { Colors } from '../../constants/colors';
+import { Colors, Shadows } from '../../theme';
+import { moduleService, ModuleItem } from '../../services/moduleService';
+import { AcademicService } from '../../services/academicService';
+import { StudentMyClassItem } from '../../types/academic';
 
 export default function StudentDashboard() {
   useProtectedRoute(['STUDENT']);
   const { user } = useAuth();
   const router = useRouter();
 
-  return (
-    <SafeScreen backgroundColor={Colors.background}>
-      <Header subtitle="Siswa" />
+  const [modules, setModules] = useState<ModuleItem[]>([]);
+  const [myClass, setMyClass] = useState<StudentMyClassItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        {/* Welcome Message Card */}
-        <View style={styles.welcomeBanner}>
-          <View style={styles.bannerIcon}>
-            <Ionicons name="sparkles" size={28} color="#FFFFFF" />
-          </View>
-          <View style={styles.bannerText}>
-            <Text style={styles.welcomeTitle}>Semangat Belajar,</Text>
-            <Text style={styles.studentName}>{user?.name || 'Siswa'}</Text>
-            <Text style={styles.welcomeSubtitle}>
-              Platform Pembelajaran Digital Sekolah Model
-            </Text>
+  const loadDashboardData = useCallback(async () => {
+    try {
+      const [modulesRes, classRes] = await Promise.allSettled([
+        moduleService.getStudentModules(),
+        AcademicService.getStudentMyClass(),
+      ]);
+
+      if (modulesRes.status === 'fulfilled') {
+        setModules(modulesRes.value || []);
+      }
+      if (classRes.status === 'fulfilled') {
+        setMyClass(classRes.value || null);
+      }
+    } catch (e) {
+      // Handled gracefully
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadDashboardData();
+  };
+
+  // Find module for "Continue Learning"
+  // Prioritize in-progress (percentage > 0 and < 100), otherwise first available module
+  const continueModule =
+    modules.find((m) => (m.percentage || 0) > 0 && (m.percentage || 0) < 100) ||
+    modules[0] ||
+    null;
+
+  // Calculate statistics
+  const totalModulesCount = modules.length;
+  const completedCount = modules.filter((m) => (m.percentage || 0) === 100).length;
+  const inProgressCount = modules.filter((m) => (m.percentage || 0) > 0 && (m.percentage || 0) < 100).length;
+  const overallPercentage =
+    totalModulesCount > 0
+      ? Math.round(
+          modules.reduce((acc, m) => acc + (m.percentage || 0), 0) / totalModulesCount
+        )
+      : 0;
+
+  return (
+    <SafeScreen backgroundColor="#F8FAFC">
+      <AppHeader
+        title="BISA Academy"
+        subtitle="Platform Pembelajaran Digital PKBM Bina Insani"
+        rightAction={{
+          icon: 'person-circle-outline',
+          onPress: () => router.push('/siswa/profile' as any),
+        }}
+      />
+
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#1E3A8A']} />
+        }
+      >
+        {/* Welcome & Student Profile Header Card */}
+        <View style={styles.welcomeCard}>
+          <View style={styles.welcomeRow}>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.studentAvatar} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Ionicons name="person" size={28} color="#1E3A8A" />
+              </View>
+            )}
+            <View style={styles.welcomeTexts}>
+              <View style={styles.greetingRow}>
+                <Text style={styles.greetingPrefix}>Halo,</Text>
+                <Text style={styles.studentName} numberOfLines={1}>
+                  {user?.name || 'Siswa'} 👋
+                </Text>
+              </View>
+              <Text style={styles.welcomeSubtitle}>
+                Siap belajar dan berkembang hari ini?
+              </Text>
+              <View style={styles.badgeRow}>
+                <View style={styles.classBadge}>
+                  <Text style={styles.classBadgeText}>
+                    {myClass ? `Kelas ${myClass.name}` : 'PKBM Bina Insani'}
+                  </Text>
+                </View>
+                <View style={styles.statusBadge}>
+                  <View style={styles.statusDot} />
+                  <Text style={styles.statusBadgeText}>Siswa Aktif</Text>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
 
-        {/* Informasi Akun & Status Akun */}
-        <Text style={styles.sectionTitle}>Informasi & Status Akun Siswa</Text>
-        <Card style={styles.accountCard}>
-          <View style={styles.infoRow}>
-            <View style={styles.infoCol}>
-              <Text style={styles.infoLabel}>Nomor Induk Siswa (NIS)</Text>
-              <Text style={styles.infoValue}>
-                {user?.student?.studentNumber || '24001'}
-              </Text>
+        {/* Motivational Card */}
+        <View style={styles.motivationBanner}>
+          <View style={styles.motivationIconBox}>
+            <Ionicons name="sparkles" size={20} color="#D97706" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.motivationQuote}>
+              "Setiap langkah kecil adalah bagian dari perjalanan besar."
+            </Text>
+            <Text style={styles.motivationMotto}>Hebat • Mandiri • Kreatif</Text>
+          </View>
+        </View>
+
+        {/* Progress Belajar Ringkasan */}
+        <Text style={styles.sectionTitle}>PROGRESS BELAJAR</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconCircle, { backgroundColor: '#EFF6FF' }]}>
+              <Ionicons name="book" size={20} color="#1E3A8A" />
             </View>
-            <View style={styles.badgeSuccess}>
-              <View style={styles.activeDot} />
-              <Text style={styles.badgeSuccessText}>Aktif Terdaftar</Text>
-            </View>
+            <Text style={styles.statNumber}>{totalModulesCount}</Text>
+            <Text style={styles.statLabel}>Total Modul</Text>
           </View>
 
-          <View style={styles.divider} />
-
-          <View style={styles.idRow}>
-            <View style={styles.idItem}>
-              <Text style={styles.idLabel}>NISN</Text>
-              <Text style={styles.idValue}>{user?.student?.nisn || '0071234561'}</Text>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconCircle, { backgroundColor: '#FEF3C7' }]}>
+              <Ionicons name="time" size={20} color="#D97706" />
             </View>
-            <View style={styles.idItem}>
-              <Text style={styles.idLabel}>Status Kelas</Text>
-              <Text style={styles.idValue}>Kelas X - Semester 1</Text>
+            <Text style={styles.statNumber}>{inProgressCount}</Text>
+            <Text style={styles.statLabel}>Diproses</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <View style={[styles.statIconCircle, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="checkmark-done" size={20} color="#059669" />
+            </View>
+            <Text style={styles.statNumber}>{completedCount}</Text>
+            <Text style={styles.statLabel}>Selesai</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <View style={[styles.statIconCircle, { backgroundColor: '#F5F3FF' }]}>
+              <Ionicons name="trophy" size={20} color="#7C3AED" />
+            </View>
+            <Text style={styles.statNumber}>{overallPercentage}%</Text>
+            <Text style={styles.statLabel}>Kelengkapan</Text>
+          </View>
+        </View>
+
+        {/* CONTINUE LEARNING (LANJUTKAN BELAJAR) */}
+        {continueModule ? (
+          <View style={styles.continueSection}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>LANJUTKAN BELAJAR</Text>
+              <TouchableOpacity onPress={() => router.push('/siswa/modul' as any)}>
+                <Text style={styles.seeAllText}>Semua Modul →</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.continueCard}>
+              <View style={styles.continueTopRow}>
+                {continueModule.thumbnailUrl ? (
+                  <Image
+                    source={{ uri: continueModule.thumbnailUrl }}
+                    style={styles.continueThumbnail}
+                  />
+                ) : (
+                  <View style={styles.continueThumbPlaceholder}>
+                    <Ionicons name="library" size={28} color="#1E3A8A" />
+                  </View>
+                )}
+                <View style={styles.continueDetails}>
+                  <View style={styles.subjectPill}>
+                    <Text style={styles.subjectPillText}>
+                      {continueModule.subject?.name || 'Mata Pelajaran'}
+                    </Text>
+                  </View>
+                  <Text style={styles.continueTitle} numberOfLines={2}>
+                    {continueModule.title}
+                  </Text>
+                  <Text style={styles.continueTeacher}>
+                    Guru: {continueModule.teacher?.user?.name || '-'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Progress bar */}
+              <View style={styles.progressContainer}>
+                <View style={styles.progressLabelRow}>
+                  <Text style={styles.progressLabel}>Progres Modul</Text>
+                  <Text style={styles.progressValue}>
+                    {continueModule.percentage || 0}%
+                  </Text>
+                </View>
+                <ProgressBar
+                  progress={continueModule.percentage || 0}
+                  color="#1E3A8A"
+                  height={8}
+                />
+              </View>
+
+              <AppButton
+                title="Lanjutkan Belajar"
+                onPress={() => router.push(`/siswa/modul/${continueModule.id}` as any)}
+                icon="play-circle-outline"
+                iconPosition="right"
+                size="md"
+                style={styles.continueButton}
+              />
             </View>
           </View>
-        </Card>
+        ) : null}
 
-        {/* Menu Cepat Siswa */}
-        <Text style={styles.sectionTitle}>Menu Cepat Siswa</Text>
+        {/* Quick Menu Navigation */}
+        <Text style={styles.sectionTitle}>MENU PEMBELAJARAN</Text>
         <View style={styles.menuGrid}>
           <TouchableOpacity
-            style={styles.menuCard}
+            style={styles.menuItem}
+            activeOpacity={0.8}
             onPress={() => router.push('/siswa/modul' as any)}
-            activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: '#D1FAE5' }]}>
-              <Ionicons name="book" size={24} color={Colors.accent} />
+            <View style={[styles.menuIconCircle, { backgroundColor: '#EFF6FF' }]}>
+              <Ionicons name="book-outline" size={24} color="#1E3A8A" />
             </View>
-            <Text style={styles.menuTitle}>Modul Saya</Text>
-            <Text style={styles.menuDesc}>Akses materi digital</Text>
+            <Text style={styles.menuItemTitle}>Modul Belajar</Text>
+            <Text style={styles.menuItemSubtitle}>Materi interaktif</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuCard}
+            style={styles.menuItem}
+            activeOpacity={0.8}
+            onPress={() => router.push('/siswa/kelas' as any)}
+          >
+            <View style={[styles.menuIconCircle, { backgroundColor: '#F0F9FF' }]}>
+              <Ionicons name="people-outline" size={24} color="#0284C7" />
+            </View>
+            <Text style={styles.menuItemTitle}>Kelas & Rombel</Text>
+            <Text style={styles.menuItemSubtitle}>Kode & teman sekelas</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.8}
             onPress={() => router.push('/siswa/tugas' as any)}
-            activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: '#FEF3C7' }]}>
-              <Ionicons name="checkbox" size={24} color={Colors.warning} />
+            <View style={[styles.menuIconCircle, { backgroundColor: '#FEF3C7' }]}>
+              <Ionicons name="checkbox-outline" size={24} color="#D97706" />
             </View>
-            <Text style={styles.menuTitle}>Daftar Tugas</Text>
-            <Text style={styles.menuDesc}>Tenggat & latihan</Text>
+            <Text style={styles.menuItemTitle}>Tugas & Latihan</Text>
+            <Text style={styles.menuItemSubtitle}>Tenggat & evaluasi</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuCard}
+            style={styles.menuItem}
+            activeOpacity={0.8}
             onPress={() => router.push('/siswa/profile' as any)}
-            activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: '#E0F2FE' }]}>
-              <Ionicons name="person" size={24} color={Colors.secondary} />
+            <View style={[styles.menuIconCircle, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="person-outline" size={24} color="#059669" />
             </View>
-            <Text style={styles.menuTitle}>Profil Siswa</Text>
-            <Text style={styles.menuDesc}>Data NISN & akun</Text>
+            <Text style={styles.menuItemTitle}>Profil Siswa</Text>
+            <Text style={styles.menuItemSubtitle}>NISN & info akun</Text>
           </TouchableOpacity>
-
-          <View style={[styles.menuCard, styles.menuCardDisabled]}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#F1F5F9' }]}>
-              <Ionicons name="medal-outline" size={24} color={Colors.textMuted} />
-            </View>
-            <Text style={[styles.menuTitle, { color: Colors.textMuted }]}>Nilai & Rapor</Text>
-            <Text style={styles.menuDesc}>Tersedia pada Tahap 2</Text>
-          </View>
         </View>
 
-        {/* Phase 1 Notice */}
-        <Card style={styles.phaseNotice}>
-          <View style={styles.phaseRow}>
-            <Ionicons name="shield-checkmark" size={20} color={Colors.accent} />
-            <View style={styles.phaseTextContainer}>
-              <Text style={styles.phaseTitle}>Akun Terotentikasi & Aman</Text>
-              <Text style={styles.phaseBody}>
-                Anda masuk sebagai Siswa. Sesi disimpan di SecureStore ponsel Anda. Rute Guru dan Admin diproteksi secara otomatis.
-              </Text>
-            </View>
+        {/* Modul Terbaru List */}
+        {modules.length > 0 && (
+          <View style={styles.recentSection}>
+            <Text style={styles.sectionTitle}>MODUL TERBARU</Text>
+            {modules.slice(0, 3).map((m) => (
+              <TouchableOpacity
+                key={m.id}
+                style={styles.recentModuleCard}
+                activeOpacity={0.8}
+                onPress={() => router.push(`/siswa/modul/${m.id}` as any)}
+              >
+                <View style={styles.recentModuleIcon}>
+                  <Ionicons name="document-text-outline" size={22} color="#1E3A8A" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.recentModuleTitle} numberOfLines={1}>
+                    {m.title}
+                  </Text>
+                  <Text style={styles.recentModuleSubject}>
+                    {m.subject?.name || 'Mata Pelajaran'} • {m.teacher?.user?.name || '-'}
+                  </Text>
+                  <View style={styles.recentModuleProgressRow}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <ProgressBar progress={m.percentage || 0} height={4} color="#059669" />
+                    </View>
+                    <Text style={styles.recentProgressText}>{m.percentage || 0}%</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            ))}
           </View>
-        </Card>
+        )}
+
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeScreen>
   );
@@ -139,183 +342,341 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 18,
-    paddingBottom: 30,
+    padding: 16,
+    paddingBottom: 32,
   },
-  welcomeBanner: {
-    backgroundColor: Colors.accent,
-    borderRadius: 18,
-    padding: 18,
+  welcomeCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+    ...Shadows.soft,
+  },
+  welcomeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  bannerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  studentAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#DBEAFE',
+  },
+  avatarPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#EFF6FF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
   },
-  bannerText: {
+  welcomeTexts: {
+    marginLeft: 14,
     flex: 1,
   },
-  welcomeTitle: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 13,
-    fontWeight: '500',
+  greetingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  greetingPrefix: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748B',
+    marginRight: 4,
   },
   studentName: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-    marginTop: 2,
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#0F172A',
+    flexShrink: 1,
   },
   welcomeSubtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 12,
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  accountCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  infoCol: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.text,
+    color: '#64748B',
     marginTop: 2,
   },
-  badgeSuccess: {
+  badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.successLight,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    gap: 8,
+    marginTop: 6,
   },
-  activeDot: {
+  classBadge: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  classBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#1E3A8A',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.success,
-    marginRight: 6,
+    backgroundColor: '#059669',
+    marginRight: 4,
   },
-  badgeSuccessText: {
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#065F46',
+  },
+  motivationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 16,
+  },
+  motivationIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  motivationQuote: {
+    fontSize: 11,
+    fontStyle: 'italic',
+    color: '#92400E',
+    fontWeight: '600',
+    lineHeight: 16,
+  },
+  motivationMotto: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#475569',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    ...Shadows.soft,
+  },
+  statIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  statNumber: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  statLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  continueSection: {
+    marginBottom: 16,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  seeAllText: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.success,
+    color: '#1E3A8A',
   },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginVertical: 12,
+  continueCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    ...Shadows.soft,
   },
-  idRow: {
+  continueTopRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  idItem: {
+  continueThumbnail: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: '#E2E8F0',
+  },
+  continueThumbPlaceholder: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueDetails: {
+    marginLeft: 12,
     flex: 1,
   },
-  idLabel: {
-    fontSize: 11,
-    color: Colors.textSecondary,
+  subjectPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginBottom: 4,
   },
-  idValue: {
-    fontSize: 13,
+  subjectPillText: {
+    fontSize: 10,
     fontWeight: '700',
-    color: Colors.text,
+    color: '#1E3A8A',
+  },
+  continueTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+    lineHeight: 18,
+  },
+  continueTeacher: {
+    fontSize: 11,
+    color: '#64748B',
     marginTop: 2,
+  },
+  progressContainer: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  progressLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  progressValue: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1E3A8A',
+  },
+  continueButton: {
+    width: '100%',
   },
   menuGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
     marginBottom: 16,
   },
-  menuCard: {
+  menuItem: {
     width: '48%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: '#E2E8F0',
+    ...Shadows.soft,
   },
-  menuCardDisabled: {
-    opacity: 0.7,
-    backgroundColor: '#FAFAFA',
-  },
-  menuIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 10,
+  menuIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
   },
-  menuTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.text,
+  menuItemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
   },
-  menuDesc: {
+  menuItemSubtitle: {
     fontSize: 11,
-    color: Colors.textSecondary,
+    color: '#64748B',
     marginTop: 2,
   },
-  phaseNotice: {
-    backgroundColor: '#F0FDF4',
-    borderColor: '#BBF7D0',
+  recentSection: {
+    marginBottom: 8,
   },
-  phaseRow: {
+  recentModuleCard: {
     flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 8,
+    ...Shadows.soft,
   },
-  phaseTextContainer: {
-    marginLeft: 10,
-    flex: 1,
+  recentModuleIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  phaseTitle: {
+  recentModuleTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: Colors.accent,
+    color: '#0F172A',
   },
-  phaseBody: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+  recentModuleSubject: {
+    fontSize: 10,
+    color: '#64748B',
     marginTop: 2,
-    lineHeight: 16,
+  },
+  recentModuleProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  recentProgressText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#059669',
   },
 });

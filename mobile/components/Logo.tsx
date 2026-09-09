@@ -1,26 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/colors';
+import { Colors } from '../theme';
 
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'light' | 'dark';
+  showTagline?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'dark' }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'dark', showTagline = true }) => {
   const isLight = variant === 'light';
 
   const iconSizes = {
-    sm: 24,
-    md: 40,
-    lg: 56,
+    sm: 20,
+    md: 36,
+    lg: 48,
+    xl: 60,
   };
 
   const containerSizes = {
-    sm: 44,
-    md: 72,
-    lg: 96,
+    sm: 38,
+    md: 64,
+    lg: 84,
+    xl: 104,
   };
 
   return (
@@ -31,8 +34,8 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'dark' }) => 
           {
             width: containerSizes[size],
             height: containerSizes[size],
-            borderRadius: containerSizes[size] / 3.5,
-            backgroundColor: isLight ? 'rgba(255, 255, 255, 0.2)' : Colors.primary,
+            borderRadius: containerSizes[size] / 3.2,
+            backgroundColor: isLight ? 'rgba(255, 255, 255, 0.18)' : Colors.primary,
           },
         ]}
       >
@@ -47,21 +50,34 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'dark' }) => 
           styles.title,
           size === 'sm' && styles.titleSm,
           size === 'lg' && styles.titleLg,
+          size === 'xl' && styles.titleXl,
           { color: isLight ? '#FFFFFF' : Colors.text },
         ]}
       >
-        SEKOLAH MODEL
+        BISA
       </Text>
       <Text
         style={[
           styles.subtitle,
           size === 'sm' && styles.subtitleSm,
           size === 'lg' && styles.subtitleLg,
-          { color: isLight ? 'rgba(255, 255, 255, 0.8)' : Colors.textSecondary },
+          size === 'xl' && styles.subtitleLg,
+          { color: isLight ? '#E0F2FE' : Colors.primaryLight },
         ]}
       >
-        Sistem Pembelajaran Digital
+        Bisa Insani Smart Academy
       </Text>
+      {showTagline && (
+        <Text
+          style={[
+            styles.motto,
+            size === 'sm' && styles.mottoSm,
+            { color: isLight ? 'rgba(255, 255, 255, 0.85)' : Colors.textSecondary },
+          ]}
+        >
+          PKBM Bina Insani • Hebat • Mandiri • Kreatif
+        </Text>
+      )}
     </View>
   );
 };
@@ -74,37 +90,52 @@ const styles = StyleSheet.create({
   iconBox: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 10,
+    shadowColor: '#1E3A8A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 2,
     textAlign: 'center',
   },
   titleSm: {
-    fontSize: 16,
-    letterSpacing: 0.5,
+    fontSize: 18,
+    letterSpacing: 1,
   },
   titleLg: {
-    fontSize: 26,
-    letterSpacing: 1.5,
+    fontSize: 32,
+    letterSpacing: 2.5,
+  },
+  titleXl: {
+    fontSize: 40,
+    letterSpacing: 3,
   },
   subtitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    marginTop: 4,
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 2,
     textAlign: 'center',
   },
   subtitleSm: {
     fontSize: 11,
   },
   subtitleLg: {
-    fontSize: 15,
+    fontSize: 16,
+  },
+  motto: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  mottoSm: {
+    fontSize: 9,
   },
 });
+

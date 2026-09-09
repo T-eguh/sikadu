@@ -397,4 +397,67 @@ export class StudentModuleService {
       stats,
     };
   }
+
+  /**
+   * Mengambil Profil Lengkap Siswa BISA (Tahap 4.5)
+   */
+  static async getProfile(userId: string) {
+    const userDoc = await prisma.user.findUnique({ where: { id: userId } });
+    const student = await (prisma as any).student.findFirst({
+      where: {
+        OR: [
+          { userId },
+          ...(userDoc?.email ? [{ email: userDoc.email }] : [])
+        ]
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatar: true }
+        },
+        classes: {
+          include: {
+            class: {
+              include: {
+                academicYear: true,
+                homeroomTeacher: {
+                  include: {
+                    user: { select: { name: true } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        moduleProgress: true,
+      }
+    });
+
+    if (!student) {
+      const error: any = new Error('Data profil siswa tidak ditemukan.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const currentEnrollment = student.classes?.[0];
+    const currentClass = currentEnrollment?.class;
+
+    return {
+      id: student.id,
+      name: student.user?.name || student.email?.split('@')[0],
+      email: student.email || student.user?.email,
+      studentNumber: student.studentNumber,
+      nisn: student.nisn,
+      profilePhotoUrl: student.profilePhotoUrl || student.user?.avatar,
+      authProvider: student.authProvider,
+      status: student.status,
+      class: currentClass ? {
+        id: currentClass.id,
+        name: currentClass.name,
+        grade: currentClass.grade,
+        academicYear: currentClass.academicYear?.name,
+        homeroomTeacher: currentClass.homeroomTeacher?.user?.name || null,
+      } : null,
+      totalCompletedMaterials: student.moduleProgress?.length || 0,
+    };
+  }
 }

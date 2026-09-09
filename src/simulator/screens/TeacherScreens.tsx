@@ -127,14 +127,23 @@ export const TeacherScreens: React.FC<TeacherScreensProps> = ({
   return (
     <div className="flex-1 w-full bg-slate-50 flex flex-col p-4 overflow-y-auto space-y-3.5">
       {/* Welcome Message Card */}
-      <div className="bg-sky-600 rounded-2xl p-4 text-white shadow-md shadow-sky-600/20 flex items-center gap-3.5">
-        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-          <School size={26} className="text-white" />
-        </div>
-        <div>
-          <span className="text-[11px] text-sky-100 font-medium">Selamat Datang,</span>
-          <h3 className="text-sm font-extrabold leading-tight">{user.name}</h3>
-          <p className="text-[11px] text-sky-100/90 mt-0.5">LMS Pengajaran Digital Sekolah Model</p>
+      {/* Welcome Message Card with BISA Official Identity */}
+      <div className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2563EB] rounded-2xl p-4 text-white shadow-md shadow-blue-950/20 flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/10">
+            <School size={26} className="text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-sky-300 font-bold uppercase tracking-wider">
+                BISA • PKBM BINA INSANI
+              </span>
+            </div>
+            <h3 className="text-sm font-black leading-tight text-white">{user.name}</h3>
+            <p className="text-[10px] text-amber-300 font-bold mt-0.5 tracking-wider">
+              HEBAT • MANDIRI • KREATIF
+            </p>
+          </div>
         </div>
       </div>
 

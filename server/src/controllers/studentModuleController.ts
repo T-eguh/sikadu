@@ -105,4 +105,22 @@ export class StudentModuleController {
       next(error);
     }
   }
+
+  /**
+   * Siswa: Mengambil profil lengkap siswa BISA
+   */
+  static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user?.id;
+      const profile = await StudentModuleService.getProfile(userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Profil siswa berhasil diambil.',
+        data: profile,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

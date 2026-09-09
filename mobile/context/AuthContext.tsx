@@ -13,6 +13,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<any>;
+  joinClass: (code: string) => Promise<any>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
   clearError: () => void;
@@ -25,6 +27,8 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   error: null,
   login: async () => {},
+  loginWithGoogle: async () => {},
+  joinClass: async () => {},
   logout: async () => {},
   restoreSession: async () => {},
   clearError: () => {},
@@ -128,6 +132,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<any> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const result = await authService.loginWithGoogle(idToken);
+
+      // Simpan token JWT aplikasi
+      await storage.saveToken(Config.tokenKey, result.token);
+      setToken(result.token);
+
+      const studentUser: User = {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        role: 'STUDENT',
+        avatar: result.user.avatar,
+        student: result.student,
+      };
+      setUser(studentUser);
+
+      // Navigasi sesuai status siswa (PENDING -> kelas / input kode, ACTIVE -> dashboard)
+      if (result.requiresClassCode || result.student?.status === 'PENDING') {
+        router.replace('/siswa/kelas' as any);
+      } else {
+        router.replace('/siswa/dashboard' as any);
+      }
+
+      return result;
+    } catch (err: any) {
+      const msg = err.message || 'Gagal masuk dengan akun Google';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const joinClass = async (code: string): Promise<any> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await authService.joinClass(code);
+
+      // Muat ulang data user profil
+      try {
+        const updated = await authService.getMe();
+        setUser(updated);
+      } catch {
+        // Abaikan jika token valid
+      }
+
+      return res;
+    } catch (err: any) {
+      const msg = err.message || 'Gagal bergabung ke kelas';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -153,6 +219,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         error,
         login,
+        loginWithGoogle,
+        joinClass,
         logout,
         restoreSession,
         clearError,
