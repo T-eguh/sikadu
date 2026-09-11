@@ -276,3 +276,96 @@ export const StudentLoginIllustration: React.FC = () => {
     </motion.div>
   );
 };
+
+// Halaman 7: Animated Checkmark Hijau with Confetti Particles
+export const AnimatedCheckmarkGreen: React.FC = () => {
+  // Confetti particles configuration (Primary Red, Primary Green, Soft Gold)
+  const confettiPieces = [
+    { x: -52, y: -45, color: '#168A5B', size: 8, delay: 0.1, rotate: 25 },
+    { x: 48, y: -48, color: '#D62828', size: 9, delay: 0.15, rotate: -30 },
+    { x: -62, y: 15, color: '#D62828', size: 7, delay: 0.2, rotate: 45 },
+    { x: 58, y: 12, color: '#36A269', size: 8, delay: 0.25, rotate: -15 },
+    { x: -38, y: -65, color: '#F59E0B', size: 6, delay: 0.18, rotate: 60 },
+    { x: 34, y: -60, color: '#168A5B', size: 7, delay: 0.22, rotate: -40 },
+    { x: -25, y: 55, color: '#EF5350', size: 6, delay: 0.28, rotate: 10 },
+    { x: 28, y: 52, color: '#168A5B', size: 7, delay: 0.3, rotate: -20 },
+  ];
+
+  return (
+    <div className="relative flex items-center justify-center select-none py-2">
+      {/* Confetti Particles with brief burst animation */}
+      {confettiPieces.map((piece, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+          animate={{
+            opacity: [0, 1, 0.9, 0],
+            scale: [0, 1.2, 1, 0.6],
+            x: piece.x,
+            y: piece.y,
+            rotate: piece.rotate + 180,
+          }}
+          transition={{
+            duration: 1.2,
+            delay: piece.delay,
+            ease: 'easeOut',
+          }}
+          style={{
+            backgroundColor: piece.color,
+            width: piece.size,
+            height: piece.size * 0.75,
+            borderRadius: piece.size > 7 ? '2px' : '999px',
+          }}
+          className="absolute z-0 pointer-events-none"
+        />
+      ))}
+
+      {/* Outer Soft Green Glow Ring */}
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0.9, 0.7] }}
+        transition={{
+          scale: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+          opacity: { duration: 0.5 },
+        }}
+        className="absolute w-28 h-28 rounded-full bg-[#E8F5EE] blur-md z-0"
+      />
+
+      {/* Main Circle with Spring Scale (Circle Scale 0 -> 1) */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{
+          type: 'spring',
+          stiffness: 260,
+          damping: 18,
+          delay: 0.05,
+        }}
+        className="relative z-10 w-20 h-20 rounded-full bg-gradient-to-tr from-[#168A5B] to-[#36A269] flex items-center justify-center shadow-lg shadow-[#168A5B]/30 border-4 border-white"
+      >
+        {/* Animated Checkmark SVG with path drawing & scale */}
+        <svg
+          viewBox="0 0 48 48"
+          className="w-10 h-10 text-white"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <motion.path
+            d="M14 24 L22 32 L34 16"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.25,
+              ease: 'easeOut',
+            }}
+          />
+        </svg>
+      </motion.div>
+    </div>
+  );
+};
+

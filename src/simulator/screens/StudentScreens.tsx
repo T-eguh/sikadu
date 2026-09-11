@@ -30,6 +30,15 @@ import { mockBackend } from '../mockApi';
 import { PkbmOfficialLogo } from '../components/LoginVisualAssets';
 import { AbstractBackgroundDecor } from '../components/EducationalIllustrations';
 import { THEME } from '../theme';
+import { motion } from 'motion/react';
+import {
+  AnimatedLearningProgressBar,
+  FloatingBookIllustration,
+  WritingPencilIllustration,
+  GraduationCapBadge,
+  EducationEmptyState,
+} from '../components/EducationVisualSystem';
+import { StudentDashboardHeroBanner } from '../components/EducationHeroVisuals';
 
 interface StudentScreensProps {
   user: User;
@@ -37,6 +46,7 @@ interface StudentScreensProps {
   onNavigateTab: (tab: 'dashboard' | 'modul' | 'tugas' | 'profile') => void;
   onLogout: () => void;
   initialOpenJoinModal?: boolean;
+  onOpenModuleDetail?: () => void;
 }
 
 export const StudentScreens: React.FC<StudentScreensProps> = ({
@@ -45,6 +55,7 @@ export const StudentScreens: React.FC<StudentScreensProps> = ({
   onNavigateTab,
   onLogout,
   initialOpenJoinModal = false,
+  onOpenModuleDetail,
 }) => {
   const [currentUser, setCurrentUser] = useState<User>(initialUser);
   const [myClassData, setMyClassData] = useState<any>(null);
@@ -374,190 +385,191 @@ export const StudentScreens: React.FC<StudentScreensProps> = ({
         </div>
       )}
 
-      {/* 2. PROGRESS HERO CARD as specified */}
-      {/* Warna: Hijau sebagai progress utama, aksen merah untuk highlight kecil */}
-      <div className="bg-gradient-to-br from-[#1B7F5A] via-[#146346] to-[#0F5C40] rounded-2xl p-4 text-white shadow-md shadow-emerald-950/15 relative overflow-hidden animate-fade-up">
-        {/* Background abstract glowing circles */}
-        <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-emerald-400/20 blur-xl pointer-events-none" />
-        <div className="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-rose-500/15 blur-lg pointer-events-none" />
+      {/* 2. PROGRESS HERO CARD - RUANG BELAJAR SISWA DIGITAL (HERO LEARNING VISUAL BESAR) */}
+      <StudentDashboardHeroBanner
+        studentName={currentUser.name}
+        classNameTitle={myClassData?.name || 'Paket Belajar BISA'}
+        completedModules={7}
+        totalModules={20}
+        learningStreak={5}
+        onContinue={() => onNavigateTab('modul')}
+      />
 
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20">
-                <TrendingUp size={15} className="text-white" />
-              </div>
-              <span className="text-xs font-black tracking-wide text-emerald-100 uppercase">
-                Progress Belajar
-              </span>
-            </div>
-
-            {/* Red Highlight Badge Accent */}
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E53935] text-white shadow-xs">
-              35% Selesai
-            </span>
-          </div>
-
-          {/* Animated Progress Bar */}
-          <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden mb-3 border border-white/10">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-300 via-emerald-100 to-[#E53935] rounded-full transition-all duration-700 ease-out"
-              style={{ width: '35%' }}
-            />
-          </div>
-
-          {/* Metrics summary: Modul Selesai / Hari Belajar */}
-          <div className="flex items-center justify-between text-xs pt-1 border-t border-white/15">
-            <div className="flex items-center gap-1.5 text-emerald-100">
-              <BookOpen size={13} className="text-emerald-300" />
-              <span className="font-semibold text-[11px]"><b>7</b> Modul Selesai</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-emerald-100">
-              <Sparkles size={13} className="text-[#FFD54F]" />
-              <span className="font-semibold text-[11px]"><b>12</b> Hari Belajar</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. SECTION: LANJUTKAN BELAJAR as specified */}
-      <div className="animate-fade-up">
+      {/* 3. SECTION: LANJUTKAN BELAJAR */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.15 }}
+      >
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-black text-[#1F2937] tracking-tight">
-            Lanjutkan Belajar
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-xs font-black text-slate-900 tracking-tight">
+              Lanjutkan Belajar
+            </h3>
+            <span className="w-2 h-2 rounded-full bg-[#168A5B] animate-pulse" />
+          </div>
           <button
             type="button"
             onClick={() => onNavigateTab('modul')}
-            className="text-[10.5px] font-bold text-[#1B7F5A] hover:underline"
+            className="text-[10.5px] font-bold text-[#168A5B] hover:underline"
           >
-            Lihat Semua
+            Lihat Semua Modul
           </button>
         </div>
 
-        {/* Card Horizontal Modern */}
-        <div className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-sm flex items-center justify-between gap-3 group hover:border-[#1B7F5A] transition">
+        {/* Card Horizontal Modern with Interactive Hover */}
+        <motion.div
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => {
+            if (onOpenModuleDetail) {
+              onOpenModuleDetail();
+            } else {
+              onNavigateTab('modul');
+            }
+          }}
+          className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-sm flex items-center justify-between gap-3 group hover:border-[#168A5B] cursor-pointer transition"
+        >
           {/* Thumbnail */}
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#1B7F5A] shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#168A5B] shrink-0 group-hover:scale-110 group-hover:bg-[#E8F5EE] transition-all">
             <Calculator size={22} />
           </div>
 
           {/* Mata Pelajaran & Judul Modul & Progress */}
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-bold text-[#1B7F5A] uppercase tracking-wider block">
-              Matematika Wajib
+            <span className="text-[10px] font-bold text-[#168A5B] uppercase tracking-wider block">
+              Matematika Wajib • Bab 1
             </span>
-            <h4 className="text-xs font-bold text-[#1F2937] truncate mt-0.5">
-              Eksponen dan Logaritma
+            <h4 className="text-xs font-bold text-slate-900 truncate mt-0.5 group-hover:text-[#168A5B] transition-colors">
+              Eksponen dan Bentuk Akar
             </h4>
 
             {/* Small Progress Indicator */}
             <div className="flex items-center gap-2 mt-1.5">
               <div className="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                <div className="h-full bg-[#1B7F5A] rounded-full" style={{ width: '65%' }} />
+                <div className="h-full bg-[#168A5B] rounded-full" style={{ width: '65%' }} />
               </div>
               <span className="text-[9.5px] font-bold text-slate-500">65%</span>
             </div>
           </div>
 
-          {/* Button "Lanjutkan" in Red as explicitly specified */}
+          {/* Button "Lanjutkan" in Red as specified */}
           <button
             type="button"
-            onClick={() => onNavigateTab('modul')}
-            className="px-3 py-2 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white text-[11px] font-bold shadow-xs active:scale-95 transition flex items-center gap-1 shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenModuleDetail) {
+                onOpenModuleDetail();
+              } else {
+                onNavigateTab('modul');
+              }
+            }}
+            className="px-3 py-2 rounded-xl bg-[#D62828] hover:bg-[#b81d1d] text-white text-[11px] font-bold shadow-xs active:scale-95 transition flex items-center gap-1.5 shrink-0"
           >
-            <span>Lanjutkan</span>
+            <span>Lanjut</span>
             <Play size={10} fill="currentColor" />
           </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* 4. SECTION: MATA PELAJARAN SAYA as specified */}
-      <div className="animate-fade-up">
+      {/* 4. SECTION: MATA PELAJARAN SAYA */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.25 }}
+      >
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-black text-[#1F2937] tracking-tight">
+          <h3 className="text-xs font-black text-slate-900 tracking-tight">
             Mata Pelajaran Saya
           </h3>
-          <span className="text-[10.5px] font-medium text-slate-400">
-            {myClassData?.name || 'Kelas Terdaftar'}
+          <span className="text-[10.5px] font-semibold text-[#168A5B] bg-[#E8F5EE] px-2 py-0.5 rounded-md border border-[#168A5B]/20">
+            {myClassData?.name || 'Paket Belajar BISA'}
           </span>
         </div>
 
         {/* Grid Modern: Matematika, Bahasa Indonesia, Bahasa Inggris, IPA */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* 1. Matematika (Red accent) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onNavigateTab('modul')}
-            className="p-3 rounded-2xl bg-white border border-rose-200/90 shadow-2xs text-left hover:border-[#E53935] hover:shadow-xs transition active:scale-[0.98] group"
+            className="p-3.5 rounded-2xl bg-white border border-rose-200/90 shadow-2xs text-left hover:border-[#D62828] hover:shadow-xs transition active:scale-[0.98] group"
           >
-            <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#E53935] flex items-center justify-center mb-2 border border-rose-100 group-hover:scale-110 transition-transform">
-              <Calculator size={18} />
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-[#D62828] flex items-center justify-center mb-2.5 border border-rose-100 group-hover:scale-110 transition-transform">
+              <Calculator size={20} />
             </div>
-            <h4 className="text-xs font-bold text-[#1F2937] group-hover:text-[#E53935] transition-colors">
+            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#D62828] transition-colors">
               Matematika
             </h4>
             <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-              <span>4 Modul</span>
-              <ChevronRight size={12} className="text-slate-300 group-hover:text-[#E53935] group-hover:translate-x-0.5 transition-all" />
+              <span>4 Modul Digital</span>
+              <ChevronRight size={13} className="text-slate-300 group-hover:text-[#D62828] group-hover:translate-x-0.5 transition-all" />
             </div>
-          </button>
+          </motion.button>
 
           {/* 2. Bahasa Indonesia (Emerald Green accent) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onNavigateTab('modul')}
-            className="p-3 rounded-2xl bg-white border border-emerald-200/90 shadow-2xs text-left hover:border-[#1B7F5A] hover:shadow-xs transition active:scale-[0.98] group"
+            className="p-3.5 rounded-2xl bg-white border border-emerald-200/90 shadow-2xs text-left hover:border-[#168A5B] hover:shadow-xs transition active:scale-[0.98] group"
           >
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#1B7F5A] flex items-center justify-center mb-2 border border-emerald-100 group-hover:scale-110 transition-transform">
-              <BookOpen size={18} />
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#168A5B] flex items-center justify-center mb-2.5 border border-emerald-100 group-hover:scale-110 transition-transform">
+              <BookOpen size={20} />
             </div>
-            <h4 className="text-xs font-bold text-[#1F2937] group-hover:text-[#1B7F5A] transition-colors">
+            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#168A5B] transition-colors">
               B. Indonesia
             </h4>
             <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-              <span>5 Modul</span>
-              <ChevronRight size={12} className="text-slate-300 group-hover:text-[#1B7F5A] group-hover:translate-x-0.5 transition-all" />
+              <span>5 Modul Digital</span>
+              <ChevronRight size={13} className="text-slate-300 group-hover:text-[#168A5B] group-hover:translate-x-0.5 transition-all" />
             </div>
-          </button>
+          </motion.button>
 
           {/* 3. Bahasa Inggris (Soft Green accent) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onNavigateTab('modul')}
-            className="p-3 rounded-2xl bg-white border border-emerald-100 shadow-2xs text-left hover:border-[#059669] hover:shadow-xs transition active:scale-[0.98] group"
+            className="p-3.5 rounded-2xl bg-white border border-emerald-100 shadow-2xs text-left hover:border-[#168A5B] hover:shadow-xs transition active:scale-[0.98] group"
           >
-            <div className="w-9 h-9 rounded-xl bg-emerald-100/70 text-[#059669] flex items-center justify-center mb-2 border border-emerald-200 group-hover:scale-110 transition-transform">
-              <Languages size={18} />
+            <div className="w-10 h-10 rounded-xl bg-[#E8F5EE] text-[#168A5B] flex items-center justify-center mb-2.5 border border-[#168A5B]/30 group-hover:scale-110 transition-transform">
+              <Languages size={20} />
             </div>
-            <h4 className="text-xs font-bold text-[#1F2937] group-hover:text-[#059669] transition-colors">
+            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#168A5B] transition-colors">
               B. Inggris
             </h4>
             <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-              <span>3 Modul</span>
-              <ChevronRight size={12} className="text-slate-300 group-hover:text-[#059669] group-hover:translate-x-0.5 transition-all" />
+              <span>3 Modul Digital</span>
+              <ChevronRight size={13} className="text-slate-300 group-hover:text-[#168A5B] group-hover:translate-x-0.5 transition-all" />
             </div>
-          </button>
+          </motion.button>
 
           {/* 4. IPA (Ruby Red accent) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onNavigateTab('modul')}
-            className="p-3 rounded-2xl bg-white border border-rose-100 shadow-2xs text-left hover:border-[#DC2626] hover:shadow-xs transition active:scale-[0.98] group"
+            className="p-3.5 rounded-2xl bg-white border border-rose-100 shadow-2xs text-left hover:border-[#D62828] hover:shadow-xs transition active:scale-[0.98] group"
           >
-            <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#DC2626] flex items-center justify-center mb-2 border border-rose-200 group-hover:scale-110 transition-transform">
-              <Atom size={18} />
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-[#D62828] flex items-center justify-center mb-2.5 border border-rose-200 group-hover:scale-110 transition-transform">
+              <Atom size={20} />
             </div>
-            <h4 className="text-xs font-bold text-[#1F2937] group-hover:text-[#DC2626] transition-colors">
+            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#D62828] transition-colors">
               IPA Terpadu
             </h4>
             <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
-              <span>6 Modul</span>
-              <ChevronRight size={12} className="text-slate-300 group-hover:text-[#DC2626] group-hover:translate-x-0.5 transition-all" />
+              <span>6 Modul Digital</span>
+              <ChevronRight size={13} className="text-slate-300 group-hover:text-[#D62828] group-hover:translate-x-0.5 transition-all" />
             </div>
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* JOIN CLASS MODAL */}
       {showJoinModal && (

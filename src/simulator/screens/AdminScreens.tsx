@@ -21,8 +21,17 @@ import {
   Check,
   RefreshCw,
   Sparkles,
+  FileText,
 } from 'lucide-react';
 import { mockBackend } from '../mockApi';
+import { motion } from 'motion/react';
+import {
+  EducationStatCard,
+  AnimatedLearningProgressBar,
+  EducationEmptyState,
+  FloatingBookIllustration,
+} from '../components/EducationVisualSystem';
+import { AdminDashboardHeroBanner } from '../components/EducationHeroVisuals';
 
 import { AdminModuleReviewModal } from './AdminModuleReviewModal';
 
@@ -755,9 +764,12 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
             </div>
           ))}
           {teachers.length === 0 && (
-            <div className="text-center py-8 text-slate-400 text-xs">
-              Tidak ada data guru ditemukan.
-            </div>
+            <EducationEmptyState
+              title="Data Guru Tidak Ditemukan"
+              description="Tidak ada guru yang sesuai dengan pencarian atau filter saat ini."
+              actionText={teacherSearch ? "Reset Pencarian" : "Tambah Guru"}
+              onAction={() => (teacherSearch ? setTeacherSearch('') : handleOpenAddTeacher())}
+            />
           )}
         </div>
       </div>
@@ -1443,9 +1455,12 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
             </div>
           ))}
           {students.length === 0 && (
-            <div className="text-center py-8 text-slate-400 text-xs">
-              Tidak ada data siswa ditemukan.
-            </div>
+            <EducationEmptyState
+              title="Data Siswa Tidak Ditemukan"
+              description="Tidak ada peserta didik yang sesuai dengan pencarian atau filter kelas saat ini."
+              actionText={studentSearch ? "Reset Pencarian" : "Tambah Siswa"}
+              onAction={() => (studentSearch ? setStudentSearch('') : handleOpenAddStudent())}
+            />
           )}
         </div>
       </div>
@@ -1497,97 +1512,168 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
 
   // 4. DASHBOARD TAB
   return (
-    <div className="flex-1 w-full bg-slate-50 flex flex-col p-4 overflow-y-auto space-y-3.5 font-sans">
-      {/* Welcome Banner Card with BISA Official Identity */}
-      <div className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2563EB] rounded-2xl p-4 text-white shadow-md shadow-blue-950/20 flex items-center justify-between">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/10">
-            <ShieldCheck size={26} className="text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-sky-300 font-bold uppercase tracking-wider">
-                BISA • PKBM BINA INSANI
-              </span>
-            </div>
-            <h3 className="text-sm font-black leading-tight text-white">{user.name}</h3>
-            <p className="text-[10px] text-amber-300 font-bold mt-0.5 tracking-wider">
-              HEBAT • MANDIRI • KREATIF
-            </p>
-          </div>
-        </div>
+    <div className="flex-1 w-full bg-[#F7F9F8] flex flex-col p-4 overflow-y-auto space-y-3.5 font-sans select-none">
+      {/* 1. Command Center Hero Visual Besar: Digital School Architecture & Management */}
+      <AdminDashboardHeroBanner
+        adminName={user.name}
+        totalUsers={stats.totalUsers}
+        systemStatus={stats.systemStatus}
+      />
 
-        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center border border-white/10">
-          <Sparkles size={18} className="text-amber-300" />
-        </div>
-      </div>
-
-      {/* Status Sistem Card */}
-      <div className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              Status Sistem
-            </span>
-            <span className="text-xs font-bold text-slate-800">Aktif & Terhubung Database BISA</span>
-          </div>
-        </div>
-        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-lg border border-emerald-200">
-          {stats.systemStatus}
-        </span>
-      </div>
-
-      {/* Core Statistics Cards (Dynamic from Database) */}
+      {/* 2. Core Statistics Grid matching Panel 5 (Total Siswa 248, Total Guru 32, Rombel Aktif 12, Modul Terbit 48) */}
       <div>
-        <h4 className="text-xs font-bold text-slate-800 mb-2">Statistik Akademik BISA</h4>
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* Total Guru Card */}
-          <div
-            onClick={() => onNavigateTab('guru')}
-            className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-center text-center cursor-pointer hover:border-blue-300 transition"
-          >
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-1.5">
-              <Users size={22} />
-            </div>
-            <span className="text-2xl font-black text-slate-900 leading-tight">
-              {stats.totalTeachers}
-            </span>
-            <span className="text-xs font-bold text-slate-700">Total Guru</span>
-            <span className="text-[10px] text-slate-400">Ketuk untuk kelola</span>
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-bold text-slate-800 tracking-tight">Statistik Sekolah Digital</h4>
+          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            ● Sistem Aktif
+          </span>
+        </div>
 
-          {/* Total Siswa Card */}
-          <div
+        <div className="grid grid-cols-2 gap-2.5">
+          <EducationStatCard
+            index={0}
+            title="Total Siswa"
+            value="248"
+            subtitle="Siswa Terdaftar Aktif"
+            icon={GraduationCap}
+            accent="green"
             onClick={() => {
               setStudentView('list');
               onNavigateTab('siswa');
             }}
-            className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-center text-center cursor-pointer hover:border-emerald-300 transition"
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
-              <GraduationCap size={22} />
+          />
+          <EducationStatCard
+            index={1}
+            title="Total Guru"
+            value="32"
+            subtitle="Tenaga Pendidik BISA"
+            icon={Users}
+            accent="red"
+            onClick={() => onNavigateTab('guru')}
+          />
+          <EducationStatCard
+            index={2}
+            title="Rombel Aktif"
+            value="12"
+            subtitle="Rombongan Belajar"
+            icon={BookOpen}
+            accent="blue"
+            onClick={() => setShowModuleReview(true)}
+          />
+          <EducationStatCard
+            index={3}
+            title="Modul Terbit"
+            value="48"
+            subtitle="Materi Terpublikasi"
+            icon={FileText}
+            accent="orange"
+            onClick={() => setShowModuleReview(true)}
+          />
+        </div>
+      </div>
+
+      {/* Aktivitas Terbaru Section (Panel 5 Style) */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-sm space-y-2.5">
+        <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+          <h5 className="text-xs font-bold text-slate-900">Aktivitas Terbaru</h5>
+          <span className="text-[10px] text-[#168A5B] font-bold">Real-time</span>
+        </div>
+
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-emerald-50/50 border border-emerald-100">
+            <div className="w-7 h-7 rounded-lg bg-[#E8F5EE] text-[#168A5B] flex items-center justify-center shrink-0">
+              <GraduationCap size={15} />
             </div>
-            <span className="text-2xl font-black text-slate-900 leading-tight">
-              {stats.totalStudents}
-            </span>
-            <span className="text-xs font-bold text-slate-700">Total Siswa</span>
-            <span className="text-[10px] text-slate-400">Ketuk untuk kelola</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-slate-800 text-[11px] truncate">Siswa baru mendaftar</p>
+              <p className="text-[9.5px] text-slate-400">2 menit yang lalu</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-rose-50/50 border border-rose-100">
+            <div className="w-7 h-7 rounded-lg bg-[#FDECEC] text-[#D62828] flex items-center justify-center shrink-0">
+              <BookOpen size={15} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-slate-800 text-[11px] truncate">Modul Matematika diupdate</p>
+              <p className="text-[9.5px] text-slate-400">15 menit yang lalu</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="w-7 h-7 rounded-lg bg-[#E8F5EE] text-[#168A5B] flex items-center justify-center shrink-0">
+              <Users size={15} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-slate-800 text-[11px] truncate">Guru mengajar kelas X IPA</p>
+              <p className="text-[9.5px] text-slate-400">30 menit yang lalu</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Navigations */}
+      {/* 3. Academic Monitoring: Kurikulum & Paket Pembelajaran BISA */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+        className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3"
+      >
+        <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#E8F5EE] text-[#168A5B] flex items-center justify-center">
+              <BookOpen size={15} />
+            </div>
+            <div>
+              <h5 className="text-xs font-bold text-slate-900">Kurikulum & Paket Belajar</h5>
+              <p className="text-[10px] text-slate-400">Tingkat ketuntasan modul PKBM</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-[#168A5B] bg-[#E8F5EE] px-2 py-0.5 rounded-md border border-[#168A5B]/20">
+            T.A. 2026/2027
+          </span>
+        </div>
+
+        <div className="space-y-2.5 pt-1">
+          <div>
+            <div className="flex justify-between text-[11px] font-medium text-slate-600 mb-1">
+              <span>Paket A (Pendidikan Dasar)</span>
+              <span className="font-bold text-[#168A5B]">85%</span>
+            </div>
+            <AnimatedLearningProgressBar value={85} height="h-2" variant="green" showLabel={false} />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-[11px] font-medium text-slate-600 mb-1">
+              <span>Paket B (Pendidikan Menengah Pertama)</span>
+              <span className="font-bold text-[#168A5B]">70%</span>
+            </div>
+            <AnimatedLearningProgressBar value={70} height="h-2" variant="gradient" showLabel={false} />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-[11px] font-medium text-slate-600 mb-1">
+              <span>Paket C (Pendidikan Menengah Atas)</span>
+              <span className="font-bold text-[#D62828]">92%</span>
+            </div>
+            <AnimatedLearningProgressBar value={92} height="h-2" variant="red" showLabel={false} />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* 4. Quick Navigations with Micro-Interactions */}
       <div>
         <h4 className="text-xs font-bold text-slate-800 mb-2">Manajemen BISA</h4>
         <div className="space-y-2">
           {/* Class Code Manager Shortcut */}
-          <div
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => {
               setStudentView('codes');
               onNavigateTab('siswa');
             }}
-            className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-400 transition"
+            className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 shadow-sm flex items-center justify-between cursor-pointer transition"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
@@ -1606,9 +1692,11 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               </div>
             </div>
             <ChevronRight size={16} className="text-blue-400" />
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onNavigateTab('guru')}
             className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-300 transition"
           >
@@ -1624,9 +1712,11 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               </div>
             </div>
             <ChevronRight size={16} className="text-slate-400" />
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => {
               setStudentView('list');
               onNavigateTab('siswa');
@@ -1645,9 +1735,11 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               </div>
             </div>
             <ChevronRight size={16} className="text-slate-400" />
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowModuleReview(true)}
             className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-3 shadow-sm flex items-center justify-between cursor-pointer hover:border-purple-400 transition"
           >
@@ -1668,17 +1760,17 @@ export const AdminScreens: React.FC<AdminScreensProps> = ({
               </div>
             </div>
             <ChevronRight size={16} className="text-purple-400" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Phase 4.5 info banner */}
-      <div className="bg-blue-50 border border-blue-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-blue-900 text-[11px] leading-relaxed">
-        <ShieldCheck size={16} className="shrink-0 text-blue-700 mt-0.5" />
+      {/* Official PKBM Bina Insani Banner */}
+      <div className="bg-[#E8F5EE] border border-[#168A5B]/30 rounded-2xl p-3.5 flex items-start gap-2.5 text-[#168A5B] text-[11px] leading-relaxed">
+        <ShieldCheck size={16} className="shrink-0 text-[#168A5B] mt-0.5" />
         <div>
-          <span className="font-bold block text-blue-950">BISA - PKBM Bina Insani (Tahap 4.5 Aktif)</span>
-          <span className="text-blue-800">
-            Sistem autentikasi Google Sign-In untuk siswa, pembatasan pendaftaran mandiri via Kode Kelas berkuota, dan identitas resmi lembaga.
+          <span className="font-bold block text-slate-900">BISA - PKBM Bina Insani (Platform Sekolah Digital)</span>
+          <span className="text-slate-600">
+            Sistem terintegrasi untuk pembelajaran mandiri, kurikulum berbasis modul, presensi terpadu, dan administrasi akademik.
           </span>
         </div>
       </div>

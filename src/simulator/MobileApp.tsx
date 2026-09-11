@@ -10,6 +10,10 @@ import { StudentSuccessScreen } from './screens/StudentSuccessScreen';
 import { AdminScreens } from './screens/AdminScreens';
 import { TeacherScreens } from './screens/TeacherScreens';
 import { StudentScreens } from './screens/StudentScreens';
+import { ModuleDetailScreen } from './screens/ModuleDetailScreen';
+import { EmptyStateScreen } from './screens/EmptyStateScreen';
+import { VisualSystemScreen } from './screens/VisualSystemScreen';
+import { SEED_USERS } from './mockApi';
 import {
   LayoutGrid,
   Users,
@@ -32,12 +36,32 @@ export type ScreenState =
   | 'student_login'
   | 'student_activation'
   | 'student_success'
-  | 'app';
+  | 'app'
+  | 'dashboard_admin'
+  | 'dashboard_guru'
+  | 'dashboard_siswa'
+  | 'module_detail'
+  | 'empty_state'
+  | 'visual_system';
 
-export const MobileApp: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<ScreenState>('splash');
+export interface MobileAppProps {
+  currentScreen?: ScreenState;
+  onScreenChange?: (screen: ScreenState) => void;
+}
+
+export const MobileApp: React.FC<MobileAppProps> = ({
+  currentScreen: externalScreen,
+  onScreenChange: externalOnScreenChange,
+}) => {
+  const [internalScreen, setInternalScreen] = useState<ScreenState>('splash');
   const [user, setUser] = useState<User | null>(null);
   const [joinedClassData, setJoinedClassData] = useState<any>(null);
+
+  const currentScreen = externalScreen ?? internalScreen;
+  const navigateScreen = (screen: ScreenState) => {
+    setInternalScreen(screen);
+    externalOnScreenChange?.(screen);
+  };
 
   // Tabs for each role
   const [adminTab, setAdminTab] = useState<'dashboard' | 'guru' | 'siswa' | 'profile'>('dashboard');
@@ -61,24 +85,20 @@ export const MobileApp: React.FC = () => {
     checkInitialSession();
   }, [checkInitialSession]);
 
-  // Halaman 1 -> Halaman 2 (or straight to app if user session exists)
+  // Halaman 1 -> Halaman 2 (Selalu ke Welcome Screen agar alur onboarding dapat terlihat)
   const handleSplashFinish = () => {
-    if (user) {
-      setCurrentScreen('app');
-    } else {
-      setCurrentScreen('welcome');
-    }
+    navigateScreen('welcome');
   };
 
   // Halaman 2 -> Halaman 3 (Welcome -> Role Selection)
   const handleStartWelcome = () => {
-    setCurrentScreen('role_select');
+    navigateScreen('role_select');
   };
 
   // Halaman 3 Role Selection
   const handleSelectRole = (role: 'SISWA' | 'ADMIN' | 'GURU') => {
     if (role === 'SISWA') {
-      setCurrentScreen('student_login');
+      navigateScreen('student_login');
     }
   };
 
@@ -87,7 +107,7 @@ export const MobileApp: React.FC = () => {
     setUser(loggedInUser);
     setAdminTab('dashboard');
     setTeacherTab('dashboard');
-    setCurrentScreen('app');
+    navigateScreen('app');
   };
 
   // Halaman 4: Student Google Login Success
@@ -101,10 +121,10 @@ export const MobileApp: React.FC = () => {
 
     if (requiresClassCode || loggedInUser.student?.status === 'PENDING') {
       // Direct transition to Halaman 6: Lengkapi Pendaftaran!
-      setCurrentScreen('student_activation');
+      navigateScreen('student_activation');
     } else {
       // Directly to Halaman 8: Dashboard Siswa
-      setCurrentScreen('app');
+      navigateScreen('app');
     }
   };
 
@@ -112,19 +132,19 @@ export const MobileApp: React.FC = () => {
   const handleClassJoinSuccess = (updatedUser: User, classData: any) => {
     setUser(updatedUser);
     setJoinedClassData(classData);
-    setCurrentScreen('student_success');
+    navigateScreen('student_success');
   };
 
   // Halaman 7 -> Halaman 8: Mulai Belajar -> Dashboard Siswa
   const handleContinueToDashboard = () => {
-    setCurrentScreen('app');
+    navigateScreen('app');
   };
 
   const handleLogout = () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setUser(null);
     setJoinedClassData(null);
-    setCurrentScreen('role_select');
+    navigateScreen('welcome');
   };
 
   // ==================== SCREEN ROUTER ====================
@@ -144,7 +164,7 @@ export const MobileApp: React.FC = () => {
       <RoleSelectionScreen
         onSelectRole={handleSelectRole}
         onStaffLoginSuccess={handleStaffLoginSuccess}
-        onBackToWelcome={() => setCurrentScreen('welcome')}
+        onBackToWelcome={() => navigateScreen('welcome')}
       />
     );
   }
@@ -153,7 +173,7 @@ export const MobileApp: React.FC = () => {
   if (currentScreen === 'student_login') {
     return (
       <StudentLoginScreen
-        onBackToRoles={() => setCurrentScreen('role_select')}
+        onBackToRoles={() => navigateScreen('role_select')}
         onStudentLoginSuccess={handleStudentLoginSuccess}
       />
     );
@@ -181,20 +201,93 @@ export const MobileApp: React.FC = () => {
     );
   }
 
-  // Fallback if no user is authenticated
-  if (!user) {
+  // 8. PANEL 8: DETAIL MODUL
+  if (currentScreen === 'module_detail') {
     return (
-      <RoleSelectionScreen
-        onSelectRole={handleSelectRole}
-        onStaffLoginSuccess={handleStaffLoginSuccess}
-        onBackToWelcome={() => setCurrentScreen('welcome')}
+      <ModuleDetailScreen
+        onBack={() => {
+          if (!user) {
+            setUser(SEED_USERS[3]);
+          }
+          navigateScreen('app');
+        }}
+        onContinueLearning={() => {
+          if (!user) {
+            setUser(SEED_USERS[3]);
+          }
+          setStudentTab('modul');
+          navigateScreen('app');
+        }}
       />
     );
   }
 
+  // 9. PANEL 9: EMPTY STATE (DATA TIDAK DITEMUKAN)
+  if (currentScreen === 'empty_state') {
+    return (
+      <EmptyStateScreen
+        onBack={() => navigateScreen('app')}
+        onGoHome={() => {
+          if (!user) {
+            setUser(SEED_USERS[3]);
+          }
+          navigateScreen('app');
+        }}
+      />
+    );
+  }
+
+  // 10. PANEL 10: PANDUAN VISUAL SISTEM & BRANDING
+  if (currentScreen === 'visual_system') {
+    return (
+      <VisualSystemScreen
+        onBack={() => navigateScreen('app')}
+      />
+    );
+  }
+
+  // DIRECT ROLE DASHBOARD SHORTCUTS
+  if (currentScreen === 'dashboard_admin') {
+    if (!user || user.role !== 'ADMIN') {
+      setUser(SEED_USERS[0]);
+    }
+    setAdminTab('dashboard');
+  } else if (currentScreen === 'dashboard_guru') {
+    if (!user || user.role !== 'TEACHER') {
+      setUser(SEED_USERS[1]);
+    }
+    setTeacherTab('dashboard');
+  } else if (currentScreen === 'dashboard_siswa') {
+    if (!user || user.role !== 'STUDENT') {
+      setUser(SEED_USERS[3]);
+    }
+    setStudentTab('dashboard');
+  }
+
+  // Fallback if no user is authenticated
+  const activeUser = user || (
+    currentScreen === 'dashboard_admin'
+      ? SEED_USERS[0]
+      : currentScreen === 'dashboard_guru'
+      ? SEED_USERS[1]
+      : SEED_USERS[3]
+  );
+
+  if (!user && currentScreen !== 'dashboard_admin' && currentScreen !== 'dashboard_guru' && currentScreen !== 'dashboard_siswa') {
+    return (
+      <RoleSelectionScreen
+        onSelectRole={handleSelectRole}
+        onStaffLoginSuccess={handleStaffLoginSuccess}
+        onBackToWelcome={() => navigateScreen('welcome')}
+      />
+    );
+  }
+
+  const effectiveUser = user || activeUser;
+
   // 8. MAIN APP SCREEN (Dashboard & tabs for Student, Teacher, or Admin)
   const getRoleHeader = () => {
-    switch (user.role) {
+    switch (effectiveUser.role) {
       case 'ADMIN':
         return {
           title: 'Administrator',
@@ -260,30 +353,31 @@ export const MobileApp: React.FC = () => {
 
       {/* Screen Body depending on Role */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        {user.role === 'ADMIN' && (
+        {effectiveUser.role === 'ADMIN' && (
           <AdminScreens
-            user={user}
+            user={effectiveUser}
             activeTab={adminTab}
             onNavigateTab={setAdminTab}
             onLogout={handleLogout}
           />
         )}
 
-        {user.role === 'TEACHER' && (
+        {effectiveUser.role === 'TEACHER' && (
           <TeacherScreens
-            user={user}
+            user={effectiveUser}
             activeTab={teacherTab}
             onNavigateTab={setTeacherTab}
             onLogout={handleLogout}
           />
         )}
 
-        {user.role === 'STUDENT' && (
+        {effectiveUser.role === 'STUDENT' && (
           <StudentScreens
-            user={user}
+            user={effectiveUser}
             activeTab={studentTab}
             onNavigateTab={setStudentTab}
             onLogout={handleLogout}
+            onOpenModuleDetail={() => navigateScreen('module_detail')}
           />
         )}
       </div>
@@ -291,7 +385,7 @@ export const MobileApp: React.FC = () => {
       {/* MODERN BOTTOM NAVIGATION BAR (Docked, Soft Shadow, Active Pill Highlight) */}
       <div className="bg-white border-t border-slate-200/90 py-1.5 px-3 flex items-center justify-around shrink-0 shadow-lg z-10">
         {/* Administrator Navigation (Merah Elegan) */}
-        {user.role === 'ADMIN' && (
+        {effectiveUser.role === 'ADMIN' && (
           <>
             <button
               onClick={() => setAdminTab('dashboard')}
@@ -341,7 +435,7 @@ export const MobileApp: React.FC = () => {
         )}
 
         {/* Teacher Navigation (Hijau Profesional) */}
-        {user.role === 'TEACHER' && (
+        {effectiveUser.role === 'TEACHER' && (
           <>
             <button
               onClick={() => setTeacherTab('dashboard')}
@@ -391,7 +485,7 @@ export const MobileApp: React.FC = () => {
         )}
 
         {/* Student Navigation as specified: Beranda, Belajar, Progress, Profil */}
-        {user.role === 'STUDENT' && (
+        {effectiveUser.role === 'STUDENT' && (
           <>
             <button
               onClick={() => setStudentTab('dashboard')}

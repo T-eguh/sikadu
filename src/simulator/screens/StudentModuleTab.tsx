@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { User, ModuleItem, ModuleContent, ContentType } from '../types';
 import { moduleApi } from '../mockApi';
+import { ModuleDetailHeroVisual, EducationEmptyStateHero } from '../components/EducationHeroVisuals';
 
 interface StudentModuleTabProps {
   user: User;
@@ -156,8 +157,10 @@ export const StudentModuleTab: React.FC<StudentModuleTabProps> = ({ user }) => {
           </span>
         </div>
 
-        {/* Module Header Card */}
+        {/* Module Header Card with Education Hero Visual */}
         <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+          <ModuleDetailHeroVisual />
+
           <div>
             <h2 className="text-sm font-bold text-slate-900 leading-snug">{activeModule.title}</h2>
             <p className="text-[11px] text-slate-500 mt-0.5">
@@ -393,14 +396,11 @@ export const StudentModuleTab: React.FC<StudentModuleTabProps> = ({ user }) => {
         {loading ? (
           <div className="text-center py-8 text-xs text-slate-400">Memuat modul pembelajaran...</div>
         ) : filteredModules.length === 0 ? (
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-              <BookOpen size={20} />
-            </div>
-            <h4 className="text-xs font-bold text-slate-800">Belum Ada Modul Aktif</h4>
-            <p className="text-[11px] text-slate-500">
-              Modul pembelajaran yang diterbitkan oleh guru pengajar akan muncul di sini.
-            </p>
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 text-center">
+            <EducationEmptyStateHero
+              title="Belum Ada Modul Aktif"
+              subtitle="Modul pembelajaran yang diterbitkan oleh guru pengajar PKBM Bina Insani akan muncul di sini."
+            />
           </div>
         ) : (
           filteredModules.map((item) => {

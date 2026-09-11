@@ -11,7 +11,20 @@ import {
   ChevronRight,
   LogOut,
   Info,
+  BookOpen,
+  Sparkles,
+  Calendar,
+  Users,
+  Award,
 } from 'lucide-react';
+import { motion } from 'motion/react';
+import {
+  EducationStatCard,
+  AnimatedLearningProgressBar,
+  FloatingBookIllustration,
+  WritingPencilIllustration,
+} from '../components/EducationVisualSystem';
+import { TeacherDashboardHeroBanner } from '../components/EducationHeroVisuals';
 
 import { TeacherModuleTab } from './TeacherModuleTab';
 
@@ -123,103 +136,146 @@ export const TeacherScreens: React.FC<TeacherScreensProps> = ({
     );
   }
 
-  // Dashboard Tab
+  // Dashboard Tab - Ruang Guru Digital
   return (
-    <div className="flex-1 w-full bg-slate-50 flex flex-col p-4 overflow-y-auto space-y-3.5">
-      {/* Welcome Message Card */}
-      {/* Welcome Message Card with BISA Official Identity */}
-      <div className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2563EB] rounded-2xl p-4 text-white shadow-md shadow-blue-950/20 flex items-center justify-between">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/10">
-            <School size={26} className="text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-sky-300 font-bold uppercase tracking-wider">
-                BISA • PKBM BINA INSANI
-              </span>
-            </div>
-            <h3 className="text-sm font-black leading-tight text-white">{user.name}</h3>
-            <p className="text-[10px] text-amber-300 font-bold mt-0.5 tracking-wider">
-              HEBAT • MANDIRI • KREATIF
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex-1 w-full bg-[#F7F9F8] flex flex-col p-4 overflow-y-auto space-y-3.5 select-none font-sans">
+      {/* 1. Ruang Guru Digital Hero Visual Besar */}
+      <TeacherDashboardHeroBanner
+        teacherName={user.name}
+        nip={user.teacher?.teacherNumber || '198501152010011001'}
+        activeModulesCount={4}
+        assignedClassesCount={2}
+        onManageModules={() => onNavigateTab('modul')}
+      />
 
-      {/* Informasi & Status Akun */}
+      {/* 2. Teaching Activity Summary (Stat Cards with Animation) */}
       <div>
-        <h4 className="text-xs font-bold text-slate-800 mb-2">Informasi & Status Akun</h4>
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-slate-400 font-semibold block">NIP Guru</span>
-              <span className="text-xs font-bold text-slate-800">
-                {user.teacher?.teacherNumber || '198501152010011001'}
-              </span>
-            </div>
-            <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-              <CheckCircle2 size={11} />
-              <span>Akun Aktif</span>
-            </span>
-          </div>
-
-          <div className="border-t border-slate-100 pt-2.5 space-y-1.5 text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <Mail size={13} className="text-slate-400" />
-              <span>{user.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck size={13} className="text-slate-400" />
-              <span>Peran: GURU (TEACHER)</span>
-            </div>
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-bold text-slate-800 tracking-tight">Aktivitas Mengajar</h4>
+          <span className="text-[10px] font-semibold text-[#168A5B] bg-[#E8F5EE] px-2 py-0.5 rounded-full border border-[#168A5B]/20">
+            Semester Genap 2026
+          </span>
         </div>
-      </div>
 
-      {/* Menu Cepat Guru */}
-      <div>
-        <h4 className="text-xs font-bold text-slate-800 mb-2">Menu Cepat Guru</h4>
         <div className="grid grid-cols-2 gap-2.5">
-          <button
+          <EducationStatCard
+            index={0}
+            title="Modul Ajar"
+            value="4 Modul"
+            subtitle="2 Terbit • 2 Review"
+            icon={BookOpen}
+            accent="green"
+            onClick={() => onNavigateTab('modul')}
+          />
+          <EducationStatCard
+            index={1}
+            title="Kelas Aktif"
+            value="2 Rombel"
+            subtitle="62 Siswa Diampu"
+            icon={Calendar}
+            accent="blue"
+            onClick={() => onNavigateTab('kelas')}
+          />
+          <EducationStatCard
+            index={2}
+            title="NIP Guru"
+            value={user.teacher?.teacherNumber?.slice(0, 7) || '1985011'}
+            subtitle="Terverifikasi Kemdikbud"
+            icon={Award}
+            accent="purple"
+            onClick={() => onNavigateTab('profile')}
+          />
+          <EducationStatCard
+            index={3}
+            title="Status Akun"
+            value="AKTIF"
+            subtitle="Layanan LMS Siap"
+            icon={CheckCircle2}
+            accent="green"
+          />
+        </div>
+      </div>
+
+      {/* 3. Kurikulum Mengajar & Progres Penyusunan Materi */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3"
+      >
+        <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#E8F5EE] text-[#168A5B] flex items-center justify-center">
+              <WritingPencilIllustration size={22} />
+            </div>
+            <div>
+              <h5 className="text-xs font-bold text-slate-900">Target Bahan Ajar Mandiri</h5>
+              <p className="text-[10px] text-slate-400">Penyusunan modul ajar semester ini</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-[#D62828] bg-[#FDECEC] px-2 py-0.5 rounded-md border border-[#D62828]/20">
+            Target 6 Modul
+          </span>
+        </div>
+
+        <div className="space-y-2 pt-1">
+          <div className="flex justify-between text-[11px] font-medium text-slate-600 mb-0.5">
+            <span>Matematika X-A & X-B (Penyusunan Modul)</span>
+            <span className="font-bold text-[#168A5B]">66% Selesai</span>
+          </div>
+          <AnimatedLearningProgressBar value={66} height="h-2" variant="green" showLabel={false} />
+        </div>
+      </motion.div>
+
+      {/* 4. Menu Cepat Guru with Micro-Interactions */}
+      <div>
+        <h4 className="text-xs font-bold text-slate-800 mb-2">Akses Cepat Pengajar</h4>
+        <div className="grid grid-cols-2 gap-2.5">
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onNavigateTab('kelas')}
             className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-start text-left hover:border-sky-300 transition"
           >
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2 border border-sky-100">
               <BookMarked size={20} />
             </div>
             <span className="text-xs font-bold text-slate-800">Jadwal Kelas</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">Daftar kelas diampu</span>
-          </button>
+            <span className="text-[10px] text-slate-400 mt-0.5">Daftar kelas & jam mengajar</span>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onNavigateTab('modul')}
             className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-start text-left hover:border-purple-300 transition"
           >
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2 border border-purple-100">
               <FileText size={20} />
             </div>
             <span className="text-xs font-bold text-slate-800">Materi & Modul</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">Bahan ajar digital</span>
-          </button>
+            <span className="text-[10px] text-slate-400 mt-0.5">Kelola modul pembelajaran</span>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onNavigateTab('profile')}
             className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex flex-col items-start text-left hover:border-emerald-300 transition"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2 border border-emerald-100">
               <UserIcon size={20} />
             </div>
             <span className="text-xs font-bold text-slate-800">Profil Pengajar</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">Informasi data guru</span>
-          </button>
+            <span className="text-[10px] text-slate-400 mt-0.5">Informasi data diri & NIP</span>
+          </motion.button>
 
-          <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex flex-col items-start text-left opacity-70">
+          <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex flex-col items-start text-left opacity-75">
             <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mb-2">
-              <FileText size={20} />
+              <Award size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-400">Penilaian Siswa</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">Tersedia di Tahap 2</span>
+            <span className="text-xs font-bold text-slate-500">Penilaian Siswa</span>
+            <span className="text-[10px] text-slate-400 mt-0.5">Buku nilai & evaluasi LMS</span>
           </div>
         </div>
       </div>

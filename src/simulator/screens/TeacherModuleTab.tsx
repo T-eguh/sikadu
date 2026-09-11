@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { User, ModuleItem, ModuleContent, ModuleStatus, ContentType, TeachingAssignment } from '../types';
 import { moduleApi } from '../mockApi';
+import { motion } from 'motion/react';
+import { EducationEmptyState } from '../components/EducationVisualSystem';
 
 interface TeacherModuleTabProps {
   user: User;
@@ -949,23 +951,34 @@ export const TeacherModuleTab: React.FC<TeacherModuleTabProps> = ({ user }) => {
         {loading ? (
           <div className="text-center py-8 text-xs text-slate-400">Memuat modul pembelajaran...</div>
         ) : filteredModules.length === 0 ? (
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-              <BookOpen size={20} />
-            </div>
-            <h4 className="text-xs font-bold text-slate-800">Tidak ada modul ditemukan</h4>
-            <p className="text-[11px] text-slate-500">
-              {search || statusFilter !== 'ALL'
-                ? 'Coba sesuaikan kata kunci atau filter pencarian Anda.'
-                : 'Mulai buat modul baru dengan memilih salah satu penugasan mengajar Anda.'}
-            </p>
-          </div>
+          <EducationEmptyState
+            title="Belum Ada Modul Digital"
+            description={
+              search || statusFilter !== 'ALL'
+                ? 'Tidak ada modul yang cocok dengan kata kunci atau filter pencarian Anda.'
+                : 'Mulai susun bahan ajar digital dengan memilih salah satu kelas penugasan Anda.'
+            }
+            actionText={search || statusFilter !== 'ALL' ? 'Reset Filter' : 'Buat Modul Sekarang'}
+            onAction={() => {
+              if (search || statusFilter !== 'ALL') {
+                setSearch('');
+                setStatusFilter('ALL');
+              } else {
+                setShowCreateModal(true);
+              }
+            }}
+          />
         ) : (
-          filteredModules.map((item) => (
-            <div
+          filteredModules.map((item, idx) => (
+            <motion.div
               key={item.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
+              whileHover={{ scale: 1.01, y: -1 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => setSelectedModuleId(item.id)}
-              className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm hover:border-sky-300 cursor-pointer transition-all space-y-2"
+              className="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm hover:border-[#168A5B] cursor-pointer transition-all space-y-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -995,7 +1008,7 @@ export const TeacherModuleTab: React.FC<TeacherModuleTabProps> = ({ user }) => {
                   <ChevronRight size={14} />
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>
