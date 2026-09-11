@@ -36,20 +36,6 @@ export const StudentLoginScreen: React.FC<StudentLoginScreenProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Quick Preset Role Chooser to test all roles easily
-  const handleSelectRolePreset = (role: 'SISWA' | 'GURU' | 'ADMIN') => {
-    if (role === 'SISWA') {
-      setEmailOrUsername('andi@pkbmbinainsani.sch.id');
-      setPassword('Siswa123!');
-    } else if (role === 'GURU') {
-      setEmailOrUsername('guru.budi@pkbmbinainsani.sch.id');
-      setPassword('Guru123!');
-    } else {
-      setEmailOrUsername('admin@pkbmbinainsani.sch.id');
-      setPassword('Admin123!');
-    }
-  };
-
   // Handle Standard Login (Panel 4 Button "Login")
   const handleDirectLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -181,43 +167,6 @@ export const StudentLoginScreen: React.FC<StudentLoginScreenProps> = ({
           <p className="text-xs text-slate-500 font-normal mt-1 leading-relaxed">
             Silakan login untuk melanjutkan
           </p>
-
-          {/* Preset Role Selector Chips */}
-          <div className="flex items-center justify-center gap-1.5 mt-3">
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('SISWA')}
-              className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition ${
-                emailOrUsername.includes('andi')
-                  ? 'bg-[#E8F5EE] text-[#168A5B] border-[#168A5B]/30 shadow-2xs'
-                  : 'bg-white text-slate-500 border-slate-200'
-              }`}
-            >
-              Siswa (Andi)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('GURU')}
-              className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition ${
-                emailOrUsername.includes('guru')
-                  ? 'bg-[#E8F5EE] text-[#168A5B] border-[#168A5B]/30 shadow-2xs'
-                  : 'bg-white text-slate-500 border-slate-200'
-              }`}
-            >
-              Guru (Bu Sari)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectRolePreset('ADMIN')}
-              className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition ${
-                emailOrUsername.includes('admin')
-                  ? 'bg-[#FDECEC] text-[#D62828] border-[#D62828]/30 shadow-2xs'
-                  : 'bg-white text-slate-500 border-slate-200'
-              }`}
-            >
-              Admin
-            </button>
-          </div>
         </motion.div>
 
         {/* Error Alert */}

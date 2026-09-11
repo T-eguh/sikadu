@@ -141,16 +141,31 @@ export const SplashEducationHero: React.FC<{ children: React.ReactNode }> = ({ c
 // ============================================================================
 export const WelcomeEducationBigHero: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
+  const [tapBounce, setTapBounce] = useState(false);
+
+  const handleTriggerInteraction = () => {
+    setTapBounce(true);
+    setTimeout(() => setTapBounce(false), 800);
+  };
 
   return (
     <div
       id="welcome-education-big-hero"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative w-full max-w-[340px] h-[225px] sm:h-[235px] mx-auto select-none my-0.5 flex flex-col items-center justify-center overflow-visible"
+      onClick={handleTriggerInteraction}
+      className="relative w-full max-w-[340px] h-[215px] sm:h-[225px] mx-auto select-none my-0.5 flex flex-col items-center justify-center overflow-visible cursor-pointer group"
+      title="Ketuk untuk interaksi siswa!"
     >
-      {/* 1. Ambient Background Pastel Aura */}
-      <div className="absolute inset-x-2 inset-y-1 rounded-full bg-gradient-to-tr from-[#E8F5EE] via-white to-[#FDECEC] blur-xl opacity-90 pointer-events-none" />
+      {/* 1. Ambient Background Pastel Aura with Breathing Animation */}
+      <motion.div
+        animate={{
+          scale: isHovered || tapBounce ? [1, 1.12, 1] : [1, 1.05, 1],
+          opacity: [0.75, 0.95, 0.75],
+        }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-x-2 inset-y-1 rounded-full bg-gradient-to-tr from-[#E8F5EE] via-white to-[#FDECEC] blur-xl pointer-events-none"
+      />
 
       {/* 2. Main Animated Vector Educational Stage */}
       <svg
@@ -181,36 +196,97 @@ export const WelcomeEducationBigHero: React.FC = () => {
             <stop offset="0%" stopColor="#F8FAFC" />
             <stop offset="100%" stopColor="#EFF6FF" />
           </linearGradient>
+          <radialGradient id="welGlowPulse" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#168A5B" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#168A5B" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
         {/* -----------------------------------------------------------------
             A. BACKGROUND: MINIMALIST ACADEMIC SMARTBOARD & ARCH
             ----------------------------------------------------------------- */}
-        <g id="classroom-decor" opacity="0.6">
-          {/* Subtle curved chalk arch */}
+        <g id="classroom-decor">
+          {/* Subtle curved chalk arch with flowing dash animation */}
           <path
             d="M50 170 C50 60, 310 60, 310 170"
             stroke="#168A5B"
-            strokeWidth="1.2"
+            strokeWidth="1.4"
             strokeDasharray="4 6"
-            strokeOpacity="0.25"
+            strokeOpacity="0.3"
             fill="none"
           />
-          {/* Floating subtle formula hints */}
-          <text x="68" y="76" fill="#168A5B" fontSize="9" fontWeight="bold" opacity="0.4" fontFamily="sans-serif">
-            E=mc²
-          </text>
-          <text x="270" y="80" fill="#D62828" fontSize="9" fontWeight="bold" opacity="0.4" fontFamily="sans-serif">
-            100%
-          </text>
+
+          {/* Floating animated formula hints with gentle hover physics */}
+          <motion.g
+            animate={{
+              y: [0, -6, 0],
+              x: [0, 2, 0],
+              opacity: [0.65, 1, 0.65],
+            }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <rect x="62" y="63" width="38" height="18" rx="9" fill="#FFFFFF" fillOpacity="0.85" stroke="#168A5B" strokeWidth="0.8" strokeOpacity="0.25" filter="drop-shadow(0 2px 4px rgba(22,138,91,0.1))" />
+            <text x="69" y="76" fill="#168A5B" fontSize="9.5" fontWeight="900" fontFamily="sans-serif">
+              E=mc²
+            </text>
+          </motion.g>
+
+          <motion.g
+            animate={{
+              y: [0, -7, 0],
+              x: [0, -2, 0],
+              opacity: [0.65, 1, 0.65],
+            }}
+            transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+          >
+            <rect x="264" y="67" width="36" height="18" rx="9" fill="#FFFFFF" fillOpacity="0.85" stroke="#D62828" strokeWidth="0.8" strokeOpacity="0.25" filter="drop-shadow(0 2px 4px rgba(214,40,40,0.1))" />
+            <text x="271" y="80" fill="#D62828" fontSize="9.5" fontWeight="900" fontFamily="sans-serif">
+              100%
+            </text>
+          </motion.g>
+
+          {/* Extra floating academic symbols */}
+          <motion.g
+            animate={{
+              y: [0, -5, 0],
+              opacity: [0.35, 0.7, 0.35],
+            }}
+            transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+          >
+            <text x="46" y="112" fill="#168A5B" fontSize="11" fontWeight="bold" opacity="0.5" fontFamily="serif">
+              π
+            </text>
+          </motion.g>
+          <motion.g
+            animate={{
+              y: [0, -6, 0],
+              opacity: [0.35, 0.75, 0.35],
+            }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut', delay: 1.1 }}
+          >
+            <text x="314" y="120" fill="#D62828" fontSize="10" fontWeight="bold" opacity="0.5" fontFamily="sans-serif">
+              ∑x
+            </text>
+          </motion.g>
         </g>
 
         {/* -----------------------------------------------------------------
-            B. GROUND: MODERN CLEAN STUDY PEDESTAL
+            B. GROUND: MODERN CLEAN STUDY PEDESTAL WITH PULSING SHADOW
             ----------------------------------------------------------------- */}
         <g id="study-pedestal">
-          {/* Soft Ground Shadow */}
-          <ellipse cx="180" cy="192" rx="142" ry="13" fill="#CBD5E1" opacity="0.35" />
+          {/* Animated Soft Ground Shadow */}
+          <motion.ellipse
+            cx="180"
+            cy="192"
+            rx="142"
+            ry="13"
+            fill="#CBD5E1"
+            animate={{
+              rx: isHovered || tapBounce ? [142, 148, 142] : [142, 145, 142],
+              opacity: isHovered || tapBounce ? 0.45 : [0.3, 0.4, 0.3],
+            }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
           {/* Smooth Tabletop Base */}
           <ellipse cx="180" cy="186" rx="132" ry="9.5" fill="url(#welDeskGrad)" stroke="#CBD5E1" strokeWidth="1" />
         </g>
@@ -221,11 +297,11 @@ export const WelcomeEducationBigHero: React.FC = () => {
         <motion.g
           id="student-girl"
           animate={{
-            y: isHovered ? [0, -8, 0] : [0, -5, 0],
+            y: tapBounce ? [0, -14, 0] : isHovered ? [0, -9, 0] : [0, -5, 0],
           }}
           transition={{
-            duration: 3.5,
-            repeat: Infinity,
+            duration: tapBounce ? 0.6 : 3.5,
+            repeat: tapBounce ? 1 : Infinity,
             ease: 'easeInOut',
           }}
         >
@@ -256,31 +332,40 @@ export const WelcomeEducationBigHero: React.FC = () => {
           <rect x="122" y="183" width="14" height="6" rx="3" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="0.8" />
           <line x1="123" y1="188" x2="135" y2="188" stroke="#D62828" strokeWidth="1.2" strokeLinecap="round" />
 
-          {/* Head & Neck */}
-          <rect x="115" y="104" width="6" height="8" rx="2" fill="#FDBA74" />
-          <circle cx="118" cy="94" r="14.5" fill="#FED7AA" />
+          {/* Head & Hair with subtle breathing tilt */}
+          <motion.g
+            animate={{
+              rotate: [-1.5, 1.5, -1.5],
+            }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ transformOrigin: '118px 104px' }}
+          >
+            {/* Neck */}
+            <rect x="115" y="104" width="6" height="8" rx="2" fill="#FDBA74" />
+            <circle cx="118" cy="94" r="14.5" fill="#FED7AA" />
 
-          {/* Neat Dark Bob Hair with Soft Bangs */}
-          <path
-            d="M103 94 C103 77, 133 77, 133 94 C133 106, 130 114, 127 116 C127 103, 125 93, 118 93 C111 93, 109 103, 109 116 C106 114, 103 106, 103 94 Z"
-            fill="#1E293B"
-          />
-          {/* Cute Signature Red Ribbon Clip */}
-          <circle cx="130" cy="86" r="3.2" fill="#D62828" />
-          <circle cx="130" cy="86" r="1" fill="#FFFFFF" />
+            {/* Neat Dark Bob Hair with Soft Bangs */}
+            <path
+              d="M103 94 C103 77, 133 77, 133 94 C133 106, 130 114, 127 116 C127 103, 125 93, 118 93 C111 93, 109 103, 109 116 C106 114, 103 106, 103 94 Z"
+              fill="#1E293B"
+            />
+            {/* Cute Signature Red Ribbon Clip */}
+            <circle cx="130" cy="86" r="3.2" fill="#D62828" />
+            <circle cx="130" cy="86" r="1" fill="#FFFFFF" />
 
-          {/* Big Sparkly Eyes */}
-          <circle cx="113" cy="93.5" r="2.2" fill="#0F172A" />
-          <circle cx="123" cy="93.5" r="2.2" fill="#0F172A" />
-          <circle cx="113.8" cy="92.6" r="0.8" fill="#FFFFFF" />
-          <circle cx="123.8" cy="92.6" r="0.8" fill="#FFFFFF" />
+            {/* Big Sparkly Eyes */}
+            <circle cx="113" cy="93.5" r="2.2" fill="#0F172A" />
+            <circle cx="123" cy="93.5" r="2.2" fill="#0F172A" />
+            <circle cx="113.8" cy="92.6" r="0.8" fill="#FFFFFF" />
+            <circle cx="123.8" cy="92.6" r="0.8" fill="#FFFFFF" />
 
-          {/* Rosy Cheeks */}
-          <ellipse cx="108" cy="98" rx="2.8" ry="1.6" fill="#FDA4AF" opacity="0.65" />
-          <ellipse cx="128" cy="98" rx="2.8" ry="1.6" fill="#FDA4AF" opacity="0.65" />
+            {/* Rosy Cheeks */}
+            <ellipse cx="108" cy="98" rx="2.8" ry="1.6" fill="#FDA4AF" opacity="0.65" />
+            <ellipse cx="128" cy="98" rx="2.8" ry="1.6" fill="#FDA4AF" opacity="0.65" />
 
-          {/* Sweet Cheerful Smile */}
-          <path d="M114 100 Q 118 103.5, 122 100" stroke="#B91C1C" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            {/* Sweet Cheerful Smile */}
+            <path d="M114 100 Q 118 103.5, 122 100" stroke="#B91C1C" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          </motion.g>
 
           {/* Arms: Holding Smart Tablet with Both Hands */}
           <path d="M99 126 L108 142 L116 142" stroke="url(#welEmeraldGrad)" strokeWidth="6" strokeLinecap="round" fill="none" />
@@ -288,29 +373,41 @@ export const WelcomeEducationBigHero: React.FC = () => {
           <path d="M137 126 L128 142 L120 142" stroke="url(#welEmeraldGrad)" strokeWidth="6" strokeLinecap="round" fill="none" />
           <circle cx="120" cy="142" r="3.5" fill="#FED7AA" />
 
-          {/* Mini Glowing Educational Tablet in Girl's Hands */}
+          {/* Mini Glowing Educational Tablet with Animated Chart */}
           <rect x="105" y="132" width="26" height="20" rx="3" fill="#0F172A" stroke="#334155" strokeWidth="0.8" />
           <rect x="107" y="134" width="22" height="16" rx="2" fill="url(#welTabletScreen)" />
+
           {/* Animated chart line on tablet */}
           <line x1="110" y1="144" x2="114" y2="140" stroke="#168A5B" strokeWidth="1.5" strokeLinecap="round" />
           <line x1="114" y1="140" x2="118" y2="142" stroke="#168A5B" strokeWidth="1.5" strokeLinecap="round" />
           <line x1="118" y1="142" x2="124" y2="137" stroke="#168A5B" strokeWidth="1.5" strokeLinecap="round" />
-          <circle cx="124" cy="137" r="1.5" fill="#D62828" />
+          {/* Pulsing indicator light on tablet */}
+          <motion.circle
+            cx="124"
+            cy="137"
+            r="1.5"
+            fill="#D62828"
+            animate={{
+              scale: [1, 1.8, 1],
+              opacity: [0.7, 1, 0.7],
+            }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          />
         </motion.g>
 
         {/* -----------------------------------------------------------------
-            D. RIGHT CHARACTER: STUDENT BOY (SISWA AKTIF)
+            D. RIGHT CHARACTER: STUDENT BOY (SISWA AKTIF DENGAN TANGAN MELAMBAI)
             ----------------------------------------------------------------- */}
         <motion.g
           id="student-boy"
           animate={{
-            y: isHovered ? [0, -9, 0] : [0, -6, 0],
+            y: tapBounce ? [0, -16, 0] : isHovered ? [0, -10, 0] : [0, -6, 0],
           }}
           transition={{
-            duration: 3.9,
-            repeat: Infinity,
+            duration: tapBounce ? 0.6 : 3.9,
+            repeat: tapBounce ? 1 : Infinity,
             ease: 'easeInOut',
-            delay: 0.25,
+            delay: tapBounce ? 0.08 : 0.25,
           }}
         >
           {/* Navy Sling Backpack Straps */}
@@ -363,12 +460,6 @@ export const WelcomeEducationBigHero: React.FC = () => {
           {/* Broad Cheerful Smile */}
           <path d="M241 100 Q 246 104, 251 100" stroke="#B91C1C" strokeWidth="1.5" strokeLinecap="round" fill="none" />
 
-          {/* Right Arm: Enthusiastic Wave / Thumbs-up */}
-          <path d="M266 122 L278 114 L282 103" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <circle cx="282" cy="102" r="4" fill="#FED7AA" />
-          {/* Thumbs-up bump */}
-          <line x1="282" y1="102" x2="284" y2="98" stroke="#FED7AA" strokeWidth="2.5" strokeLinecap="round" />
-
           {/* Left Arm: Holding Textbook against chest */}
           <path d="M228 122 L216 136 L210 144" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           <circle cx="210" cy="144" r="4" fill="#FED7AA" />
@@ -382,23 +473,48 @@ export const WelcomeEducationBigHero: React.FC = () => {
             {/* Hanging ribbon bookmark */}
             <path d="M8 26 L8 31 L10 29 L12 31 L12 26 Z" fill="#FBBF24" />
           </g>
+
+          {/* Right Arm: ANIMATED WAVING HAND (MELAMBAI DENGAN SEMANGAT) */}
+          <motion.g
+            animate={{
+              rotate: [0, 15, -6, 16, 0],
+            }}
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            style={{ transformOrigin: '266px 122px' }}
+          >
+            <path d="M266 122 L278 114 L282 103" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <circle cx="282" cy="102" r="4" fill="#FED7AA" />
+            {/* Thumbs-up / waving fingers */}
+            <line x1="282" y1="102" x2="284" y2="98" stroke="#FED7AA" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="280" y1="100" x2="281" y2="96" stroke="#FED7AA" strokeWidth="2" strokeLinecap="round" />
+          </motion.g>
         </motion.g>
 
         {/* -----------------------------------------------------------------
-            E. CENTER STUDY ACCESSORIES: STACK OF BOOKS & SMART SCREEN
+            E. CENTER STUDY ACCESSORIES: STACK OF BOOKS & SMART PENCIL
             ----------------------------------------------------------------- */}
-        <g id="center-study-props">
+        <motion.g
+          id="center-study-props"
+          animate={{
+            y: tapBounce ? [0, -6, 0] : [0, -2, 0],
+          }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
           {/* Stack of 3 Curriculum Books on Desk */}
           <g transform="translate(148, 154)">
-            {/* Bottom Book: Emerald Green (Kurikulum Merdeka) */}
+            {/* Bottom Book: Emerald Green */}
             <rect x="0" y="16" width="34" height="8" rx="2" fill="url(#welEmeraldGrad)" />
             <rect x="2" y="18" width="30" height="4" rx="1" fill="#FFFFFF" opacity="0.9" />
 
-            {/* Middle Book: Ruby Red (Modul Interaktif) */}
+            {/* Middle Book: Ruby Red */}
             <rect x="3" y="9" width="30" height="7.5" rx="2" fill="url(#welRubyGrad)" />
             <rect x="5" y="11" width="26" height="3.5" rx="1" fill="#FFFFFF" opacity="0.9" />
 
-            {/* Top Book: Golden Yellow (Sains & Vokasi) */}
+            {/* Top Book: Golden Yellow */}
             <rect x="6" y="2" width="26" height="7.5" rx="2" fill="url(#welGoldGrad)" />
             <rect x="8" y="4" width="22" height="3.5" rx="1" fill="#FFFFFF" opacity="0.9" />
 
@@ -406,25 +522,25 @@ export const WelcomeEducationBigHero: React.FC = () => {
             <path d="M16 2 L16 23 L18 21 L20 23 L20 2 Z" fill="#D62828" />
           </g>
 
-          {/* Yellow Study Pencil Leaning on Books */}
+          {/* Yellow Study Pencil Leaning on Books with small bounce */}
           <g transform="translate(140, 156) rotate(-28)">
             <rect x="0" y="4" width="5" height="20" rx="1" fill="#FBBF24" />
             <rect x="0" y="0" width="5" height="4" rx="1" fill="#F87171" />
             <polygon points="0,24 2.5,29 5,24" fill="#FED7AA" />
             <polygon points="1.5,27 2.5,29 3.5,27" fill="#1E293B" />
           </g>
-        </g>
+        </motion.g>
 
         {/* -----------------------------------------------------------------
-            F. FLOATING MAGICAL ACADEMIC ELEMENTS
+            F. FLOATING MAGICAL ACADEMIC ELEMENTS WITH COOL ANIMATIONS
             ----------------------------------------------------------------- */}
         {/* 1. Floating Graduation Mortarboard (Top Center) */}
         <motion.g
           id="floating-toga-cap"
           transform="translate(162, 30)"
           animate={{
-            y: [0, -8, 0],
-            rotate: [-4, 4, -4],
+            y: [0, -9, 0],
+            rotate: [-5, 5, -5],
           }}
           transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
         >
@@ -434,19 +550,34 @@ export const WelcomeEducationBigHero: React.FC = () => {
           <polygon points="18,0 36,8 18,16 0,8" fill="#1E293B" stroke="#0F172A" strokeWidth="0.8" />
           {/* Cap Skull Base */}
           <path d="M7,11 L7,17 C7,21 29,21 29,17 L29,11" fill="#0F172A" />
-          {/* Flowing Golden Tassel */}
-          <path d="M18,9 C24,11 28,15 28,23" stroke="#F59E0B" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          {/* Flowing Golden Tassel with sway */}
+          <motion.path
+            d="M18,9 C24,11 28,15 28,23"
+            stroke="#F59E0B"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            fill="none"
+            animate={{
+              d: [
+                'M18,9 C24,11 28,15 28,23',
+                'M18,9 C22,11 30,16 30,24',
+                'M18,9 C24,11 28,15 28,23',
+              ],
+            }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          />
           <circle cx="28" cy="24" r="2.2" fill="#F59E0B" />
           <circle cx="18" cy="8" r="1.8" fill="#FBBF24" />
         </motion.g>
 
-        {/* 2. Floating "A+" Achievement Badge (Top-Left) */}
+        {/* 2. Floating "A+" Achievement Badge (Top-Left) with Golden Glow */}
         <motion.g
           id="floating-badge-grade"
           transform="translate(36, 40)"
           animate={{
-            y: [0, -6, 0],
-            scale: [1, 1.05, 1],
+            y: [0, -7, 0],
+            scale: [1, 1.06, 1],
+            rotate: [-2, 2, -2],
           }}
           transition={{ duration: 3.3, repeat: Infinity, ease: 'easeInOut' }}
         >
@@ -459,7 +590,7 @@ export const WelcomeEducationBigHero: React.FC = () => {
             fill="#FFFFFF"
             stroke="#E2E8F0"
             strokeWidth="1.2"
-            filter="drop-shadow(0 4px 6px rgba(0,0,0,0.06))"
+            filter="drop-shadow(0 4px 10px rgba(245,158,11,0.18))"
           />
           <circle cx="14" cy="13" r="8" fill="#FEF3C7" />
           <polygon
@@ -471,17 +602,28 @@ export const WelcomeEducationBigHero: React.FC = () => {
           </text>
         </motion.g>
 
-        {/* 3. Floating Inspiration Lightbulb (Top-Right) */}
+        {/* 3. Floating Inspiration Lightbulb (Top-Right) with Pulsing Halo Rays */}
         <motion.g
           id="floating-lightbulb"
           transform="translate(268, 36)"
           animate={{
-            y: [0, -6, 0],
+            y: [0, -7, 0],
             scale: [1, 1.08, 1],
           }}
           transition={{ duration: 3.0, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
         >
-          <circle cx="15" cy="15" r="16" fill="#FEF3C7" opacity="0.6" />
+          {/* Animated Glow Aura */}
+          <motion.circle
+            cx="15"
+            cy="15"
+            r="16"
+            fill="#FEF3C7"
+            animate={{
+              r: [14, 19, 14],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+          />
           <circle
             cx="15"
             cy="15"
@@ -489,20 +631,50 @@ export const WelcomeEducationBigHero: React.FC = () => {
             fill="#FFFFFF"
             stroke="#FDE68A"
             strokeWidth="1.2"
-            filter="drop-shadow(0 3px 6px rgba(245,158,11,0.15))"
+            filter="drop-shadow(0 3px 8px rgba(245,158,11,0.25))"
           />
           <path d="M12 12 C12 9.5 18 9.5 18 12 C18 14 16 15 16 17 L14 17 C14 15 12 14 12 12 Z" fill="#F59E0B" />
           <rect x="14" y="18" width="2" height="1.5" rx="0.5" fill="#D97706" />
-          {/* Spark rays */}
-          <line x1="15" y1="2" x2="15" y2="4.5" stroke="#F59E0B" strokeWidth="1.6" strokeLinecap="round" />
-          <line x1="23" y1="6" x2="25" y2="4.5" stroke="#F59E0B" strokeWidth="1.6" strokeLinecap="round" />
-          <line x1="7" y1="6" x2="5" y2="4.5" stroke="#F59E0B" strokeWidth="1.6" strokeLinecap="round" />
+          {/* Dynamic Spark rays with pulsing opacity */}
+          <motion.line
+            x1="15"
+            y1="1"
+            x2="15"
+            y2="4"
+            stroke="#F59E0B"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
+          />
+          <motion.line
+            x1="24"
+            y1="5"
+            x2="26.5"
+            y2="3"
+            stroke="#F59E0B"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity, delay: 0.2 }}
+          />
+          <motion.line
+            x1="6"
+            y1="5"
+            x2="3.5"
+            y2="3"
+            stroke="#F59E0B"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity, delay: 0.4 }}
+          />
         </motion.g>
 
-        {/* 4. Twinkling Golden Academic Sparkles (✦) */}
+        {/* 4. Twinkling Golden & Emerald Academic Sparkles (✦) */}
         <motion.g
           transform="translate(72, 105)"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+          animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5], rotate: [0, 45, 0] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
         >
           <polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="url(#welGoldGrad)" />
@@ -510,7 +682,7 @@ export const WelcomeEducationBigHero: React.FC = () => {
 
         <motion.g
           transform="translate(308, 95)"
-          animate={{ scale: [1, 1.25, 1], opacity: [0.6, 1, 0.6] }}
+          animate={{ scale: [1, 1.35, 1], opacity: [0.5, 1, 0.5], rotate: [0, -45, 0] }}
           transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
         >
           <polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" fill="url(#welGoldGrad)" />
@@ -518,29 +690,20 @@ export const WelcomeEducationBigHero: React.FC = () => {
 
         <motion.g
           transform="translate(208, 22)"
-          animate={{ scale: [1, 1.35, 1], opacity: [0.5, 1, 0.5] }}
+          animate={{ scale: [1, 1.45, 1], opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
         >
           <polygon points="4,0 5.2,2.8 8,4 5.2,5.2 4,8 2.8,5.2 0,4 2.8,2.8" fill="url(#welGoldGrad)" />
         </motion.g>
-      </svg>
 
-      {/* 3. Floating Interactive Quality Badges Below Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35, duration: 0.4 }}
-        className="w-full flex items-center justify-center gap-2 mt-1 px-2"
-      >
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F5EE] border border-[#168A5B]/25 text-[#168A5B] text-[10.5px] font-bold shadow-2xs">
-          <Award size={12} className="text-[#168A5B]" />
-          <span>Akreditasi B BAN-PDM</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FDECEC] border border-[#D62828]/25 text-[#D62828] text-[10.5px] font-bold shadow-2xs">
-          <Sparkles size={11} className="text-[#D62828]" />
-          <span>Kurikulum Merdeka</span>
-        </span>
-      </motion.div>
+        <motion.g
+          transform="translate(142, 70)"
+          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.85, 0.3] }}
+          transition={{ duration: 3.0, repeat: Infinity, ease: 'easeInOut', delay: 0.9 }}
+        >
+          <polygon points="3.5,0 4.5,2.5 7,3.5 4.5,4.5 3.5,7 2.5,4.5 0,3.5 2.5,2.5" fill="#168A5B" opacity="0.8" />
+        </motion.g>
+      </svg>
     </div>
   );
 };

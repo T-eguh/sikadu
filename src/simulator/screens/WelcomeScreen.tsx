@@ -5,7 +5,8 @@ import { PkbmOfficialLogo } from '../components/LoginVisualAssets';
 import {
   AbstractBackgroundDecor,
 } from '../components/EducationalIllustrations';
-import { WelcomeEducationBigHero, BottomCornerWaveDecor } from '../components/EducationHeroVisuals';
+import { BottomCornerWaveDecor } from '../components/EducationHeroVisuals';
+import { SchoolCampusAnimation } from '../components/SchoolCampusAnimation';
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -91,12 +92,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
 
       {/* CENTER SECTION: HERO ILLUSTRATION & HEADLINE TYPOGRAPHY */}
       <div className="z-10 flex flex-col items-center text-center my-auto py-1">
-        {/* HERO ILLUSTRATION BESAR DUA SISWA BELAJAR DIGITAL */}
+        {/* HERO ANIMASI SEKOLAHAN & SUASANA KELAS AKTIF */}
         <div className="w-full my-0.5">
-          <WelcomeEducationBigHero />
+          <SchoolCampusAnimation />
         </div>
 
-        {/* HEADLINE BESAR: Belajar Lebih Mudah Bersama BISA (Panel 2 Style) */}
+        {/* HEADLINE BESAR: Raih Prestasi Gemilang Bersama PKBM Bina Insani */}
         <motion.div
           initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -104,20 +105,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
           className="px-2 mt-2"
         >
           <h2 className="text-xl sm:text-2xl font-black text-[#1F2937] tracking-tight leading-snug">
-            Belajar Lebih Mudah
+            Raih Prestasi Gemilang
             <br />
-            <span className="text-[#168A5B]">Bersama BISA</span>
+            <span className="text-[#168A5B]">Bersama PKBM Bina Insani</span>
           </h2>
         </motion.div>
 
-        {/* DESKRIPSI (Panel 2 Reference) */}
+        {/* DESKRIPSI ELEGAN & MODERN */}
         <motion.p
           initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.45, delay: 0.6, ease: 'easeOut' }}
-          className="text-xs text-[#64748B] font-normal mt-1 leading-normal max-w-[280px] mx-auto"
+          className="text-xs text-[#64748B] font-normal mt-1.5 leading-relaxed max-w-[290px] mx-auto"
         >
-          Platform pembelajaran digital untuk masa depan yang lebih baik.
+          Pusat kegiatan belajar cerdas, mandiri, dan fleksibel untuk wujudkan masa depan berprestasi tanpa batas.
         </motion.p>
 
         {/* MOTTO BADGE ("HEBAT • MANDIRI • KREATIF") */}
